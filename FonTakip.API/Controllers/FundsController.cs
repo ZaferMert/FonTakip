@@ -96,7 +96,6 @@ namespace FonTakip.API.Controllers
             _fundService.DeleteFund(existingFund);
 
             return Ok("Fon başarıyla silindi.");
-            
         }
     }
 }
