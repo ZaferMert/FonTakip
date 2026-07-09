@@ -1,6 +1,17 @@
 @FonTakip.API_HostAddress = http://localhost:5043
 
-GET {{FonTakip.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Yeni Fon Ekleme Testi (POST)
+POST {{FonTakip.API_HostAddress}}/api/funds
+Content-Type: application/json
+
+{
+  "name": "Emlak Katılım Teknoloji Fonu",
+  "code": "EKT",
+  "category": "Hisse Senedi"
+}
 
 ###
+
+### 2. Fonları Listeleme Testi (GET)
+GET {{FonTakip.API_HostAddress}}/api/funds
+Accept: application/json

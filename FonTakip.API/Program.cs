@@ -1,30 +1,38 @@
-using Microsoft.EntityFrameworkCore;
 using FonTakip.API.Data;
+using Microsoft.EntityFrameworkCore;
+using FonTakip.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- SERVİS AYARLARI (BUILD OLMADAN ÖNCE BURAYA YAZILIR) ---
+// --- 1. MUTFAK HAZIRLIĞI (Services) ---
 
-// OpenAPI (Test arayüzü) servisini ekliyoruz
-builder.Services.AddOpenApi();
+// Controller kapılarımızı aktifleştirir
+builder.Services.AddControllers();
+builder.Services.AddScoped<FundService>();
 
-// Veritabanı Köprümüzü (AppDbContext) sisteme tanıtıyoruz
+// Swagger görsel arayüzü için gerekli ayarlar
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Veritabanı köprümüz
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// -----------------------------------------------------------
-
 var app = builder.Build();
 
-// --- UYGULAMA ÇALIŞMA AYARLARI (BUILD OLDUKTAN SONRA) ---
+// --- 2. RESTORAN KURALLARI (Middleware) ---
 
+// Eğer geliştirme (Development) aşamasındaysak Swagger'ı göster
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
 
-// İleride kendi API adreslerimizi (Fonları getir, Kullanıcı ekle vb.) buraya yazacağız.
+// Yazdığımız Controller'ları sisteme haritalandırır
+app.MapControllers(); 
 
 app.Run();
