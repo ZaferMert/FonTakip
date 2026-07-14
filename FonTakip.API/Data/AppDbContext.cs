@@ -15,5 +15,16 @@ namespace FonTakip.API.Data
         public DbSet<Fund> Funds { get; set; }
         public DbSet<FundPrice> FundPrices { get; set; }
         public DbSet<User> Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Bire-Çok (One-to-Many) İlişkinin C# dilinde kurumsal tanımı:
+            modelBuilder.Entity<FundPrice>()
+                .HasOne(fp => fp.Fund)          // Bir fiyatın TEK BİR fonu vardır.
+                .WithMany(f => f.Prices)        // Bir fonun BİRDEN ÇOK fiyatı olabilir.
+                .HasForeignKey(fp => fp.FundId); // Aralarındaki bağlantı köprüsü "FundId" numarasıdır.
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

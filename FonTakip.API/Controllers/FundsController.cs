@@ -3,6 +3,7 @@ using FonTakip.API.Data;
 using FonTakip.API.Models;
 using FonTakip.API.DTOs;
 using FonTakip.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FonTakip.API.Controllers
 {
@@ -42,6 +43,7 @@ namespace FonTakip.API.Controllers
 
         // 2. POST: Yeni fon ekleme kapısı
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult CreateFund([FromBody] FundCreateDto request)
         {
             // Dışarıdan gelen garsonu (DTO), mutfağın anladığı dile (Entity) çeviriyoruz.
@@ -96,6 +98,16 @@ namespace FonTakip.API.Controllers
             _fundService.DeleteFund(existingFund);
 
             return Ok("Fon başarıyla silindi.");
+        }
+
+        // 5. POST: Bir fona yeni fiyat ekleme kapısı
+        // Adres Örneği: POST /api/funds/5/prices (5 numaralı fona fiyat ekle)
+        [HttpPost("{fundId}/prices")]
+        public IActionResult AddPrice(int fundId, [FromBody] FundPriceCreateDto request)
+        {
+            _fundService.AddPriceToFund(fundId, request.Price);
+
+            return Ok("Fiyat başarıyla eklendi.");
         }
     }
 }

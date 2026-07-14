@@ -1,17 +1,25 @@
 @FonTakip.API_HostAddress = http://localhost:5043
 
-### 1. Yeni Fon Ekleme Testi (POST)
-POST {{FonTakip.API_HostAddress}}/api/funds
+### 1. GİRİŞ YAP VE TOKEN AL
+# Bu isteğin hemen üstündeki "Send Request" (İstek Gönder) yazısına tıkla.
+POST {{FonTakip.API_HostAddress}}/api/auth/login
 Content-Type: application/json
 
 {
-  "name": "Emlak Katılım Teknoloji Fonu",
-  "code": "EKT",
-  "category": "Hisse Senedi"
+  "username": "Zafer Mert",
+  "password": "1020"
 }
 
 ###
 
-### 2. Fonları Listeleme Testi (GET)
-GET {{FonTakip.API_HostAddress}}/api/funds
-Accept: application/json
+### 2. KİLİTLİ ODAYA FON EKLE
+# Üstteki adımdan dönen o uzun Token metnini kopyala ve aşağıdaki "BURAYA_YAPISTIR" yazan yere koy.
+# Sonra bu isteğin üstündeki "Send Request" yazısına tıkla.
+POST {{FonTakip.API_HostAddress}}/api/funds
+Authorization: Bearer BURAYA_YAPISTIR
+Content-Type: application/json
+
+{
+  "name": "Yeni Test Fonu",
+  "isin": "TST001"
+}

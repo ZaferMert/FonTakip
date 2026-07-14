@@ -16,5 +16,6 @@ namespace FonTakip.API.Models
 
         // Fonun şu an piyasada aktif işlem görüp görmediği durumu
         public bool IsActive { get; set; } = true;
+        public List<FundPrice> Prices { get; set; } = new List<FundPrice>();
     }
 }

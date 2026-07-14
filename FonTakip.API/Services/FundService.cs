@@ -1,6 +1,7 @@
 using FonTakip.API.Controllers;
 using FonTakip.API.Data;
 using FonTakip.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FonTakip.API.Services
 {
@@ -13,18 +14,11 @@ namespace FonTakip.API.Services
         {
             _context = context;
         }
-
-        // --- SIRA SENDE ---
-        // Sadece aktif olan (IsActive == true) fonları veritabanından çekip liste olarak döndüren metodu yaz.
-        // İPUCU: Dünkü Controller'da "var funds = ..." diye yazdığın o LINQ filtresini kullan.
-        // Dikkat: Burada "return Ok(funds);" YAZAMAYIZ çünkü burası Controller (Garson) değil. 
-        // Sadece "return funds;" diyerek veriyi doğrudan döndürmelisin.
         
         public List<Fund> GetAllFunds()
         {
             // Sadece aktif olanları filtrele:
-            var funds = _context.Funds.Where(f => f.IsActive == true).ToList();
-
+            var funds = _context.Funds.Include(f => f.Prices).Where(f => f.IsActive == true).ToList();
             return funds;
         }
 
@@ -50,7 +44,7 @@ namespace FonTakip.API.Services
         // GET: Tek bir fonu ID ile bulma
         public Fund? GetFundById(int id)
         {
-            return _context.Funds.FirstOrDefault(f => f.Id == id);
+            return _context.Funds.Include(f => f.Prices).FirstOrDefault(f => f.Id == id);
         }
 
         // PUT: Fon güncelleme
@@ -66,6 +60,23 @@ namespace FonTakip.API.Services
             fund.IsActive = false;
             _context.Funds.Update(fund);
             _context.SaveChanges();
+        }
+
+        // POST: Bir fona yeni fiyat ekleme
+        public void AddPriceToFund(int targetFundId, decimal incomingPrice)
+        {    
+            var newFundPrice = new FundPrice
+            {
+                FundId = targetFundId,
+                Price = incomingPrice,
+                Date = DateTime.Now,
+                ChangeRate = 0
+            };
+
+            _context.FundPrices.Add(newFundPrice);
+
+            _context.SaveChanges();
+
         }
     }
 }
