@@ -1,95 +1,175 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function FundDetail() {
   const { id } = useParams();
+  
+  // 1. YENİ: Durum (State) Yönetimi
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [fundData, setFundData] = useState(null);
 
-  const fund = {
-    code: 'MAC',
-    name: 'Marmara Capital Hisse Senedi Fonu',
-    price: '14.52 ₺',
-    trend: '+2.4%',
-    isPositive: true,
-    riskValue: '6 / 7',
-    monthlyReturn: '%8.5',
-    yearlyReturn: '%112.4'
-  };
-
-  return (
-    <div className="min-h-screen bg-zinc-950 text-white p-6 md:p-10">
-      <div className="max-w-5xl mx-auto">
+  // 2. YENİ: Yaşam Döngüsü (Veri Çekme Simülasyonu)
+  useEffect(() => {
+    // Sayfa açıldığında loading'i başlat
+    setIsLoading(true);
+    
+    // Gerçek bir API'ye istek atıyormuşuz gibi 1.5 saniye gecikme (setTimeout) veriyoruz
+    const timer = setTimeout(() => {
+      try {
+        // İleride burası axios.get(`/api/funds/${id}`) olacak
+        const mockData = {
+          name: "Marmara Capital Hisse Senedi Fonu",
+          code: "MAC",
+          currentPrice: 14.52,
+          dailyChange: "+2.4%",
+          risk: "6 / 7",
+          monthlyReturn: "%8.5",
+          yearlyReturn: "%112.4",
+          chart: [
+            { date: '1 Tem', price: 13.50 },
+            { date: '3 Tem', price: 13.80 },
+            { date: '5 Tem', price: 13.65 },
+            { date: '7 Tem', price: 14.10 },
+            { date: '9 Tem', price: 14.35 },
+            { date: '11 Tem', price: 14.20 },
+            { date: '14 Tem', price: 14.52 },
+          ]
+        };
         
-        {/* Üst Menü (Geri Dönüş Butonu) - Küçültüldü */}
-        <Link to="/funds" className="inline-flex items-center text-zinc-400 hover:text-cyan-400 text-sm transition-colors mb-6">
-          <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Piyasalara Dön
-        </Link>
+        setFundData(mockData);
+        setIsLoading(false);
+      } catch (err) {
+        setError("Fon verileri yüklenirken bir sorun oluştu.");
+        setIsLoading(false);
+      }
+    }, 1500); // 1.5 saniye bekle
 
-        {/* Fon Başlık ve Fiyat Alanı - Yeniden Düzenlendi */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-zinc-900 border border-zinc-800 p-6 rounded-2xl mb-8">
+    // Bileşen ekrandan kalkarsa sayacı temizle
+    return () => clearTimeout(timer);
+  }, [id]);
+
+  // 3. YENİ: Yükleniyor (Skeleton) Ekranı
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 p-4 md:p-8">
+        <div className="max-w-[1000px] mx-auto animate-pulse">
+          <div className="h-4 bg-zinc-800 rounded w-24 mb-8"></div>
           
-          {/* Sol Taraf: Kod ve İsim */}
-          <div className="mb-4 md:mb-0">
-            <div className="inline-block bg-zinc-950 border border-zinc-800 px-2.5 py-1 rounded-md mb-3">
-              <span className="font-semibold text-cyan-400 text-sm">{fund.code}</span>
+          <div className="flex flex-col sm:flex-row justify-between mb-8 gap-4">
+            <div>
+              <div className="h-6 bg-zinc-800 rounded w-16 mb-3"></div>
+              <div className="h-8 bg-zinc-800 rounded w-64 md:w-96"></div>
             </div>
-            {/* Başlık boyutu ve kalınlığı inceltildi */}
-            <h1 className="text-xl md:text-2xl font-medium tracking-tight text-zinc-100">{fund.name}</h1>
+            <div className="flex flex-col items-start sm:items-end">
+              <div className="h-4 bg-zinc-800 rounded w-20 mb-2"></div>
+              <div className="h-8 bg-zinc-800 rounded w-32"></div>
+            </div>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 h-[400px]">
+              <div className="h-4 bg-zinc-800 rounded w-48 mb-8"></div>
+              <div className="w-full h-[280px] bg-zinc-800/50 rounded-lg"></div>
+            </div>
+            <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 h-[400px]">
+              <div className="h-4 bg-zinc-800 rounded w-24 mb-8"></div>
+              <div className="space-y-6">
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+              </div>
+              <div className="h-12 bg-zinc-800 rounded w-full mt-12"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. YENİ: Hata Ekranı
+  if (error) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-xl max-w-md text-center">
+          <svg className="w-12 h-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h2 className="text-lg font-bold mb-2">Eyvah! Bir Hata Oluştu</h2>
+          <p className="text-sm">{error}</p>
+          <Link to="/funds" className="mt-6 inline-block bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition-colors">
+            Piyasalara Dön
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. ASIL EKRAN: Veriler başarıyla yüklendiğinde gösterilecek arayüz
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
+      <div className="max-w-[1000px] mx-auto">
+        <div className="mb-8">
+          <Link to="/funds" className="text-cyan-500 hover:text-cyan-400 text-sm flex items-center gap-2 mb-4 w-fit">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Piyasalara Dön
+          </Link>
           
-          {/* Sağ Taraf: Fiyat ve Trend */}
-          <div className="text-left md:text-right">
-            <p className="text-zinc-500 mb-1 text-sm">Güncel Fiyat</p>
-            <div className="flex items-center md:justify-end gap-3">
-              {/* Fiyat boyutu küçültüldü */}
-              <span className="text-2xl md:text-3xl font-bold text-white">{fund.price}</span>
-              <span className={`text-sm font-semibold px-2.5 py-1 rounded-lg ${fund.isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                {fund.trend}
-              </span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+            <div>
+              <div className="bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md text-sm font-bold text-cyan-400 w-fit mb-3">
+                {fundData.code}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-medium text-white">{fundData.name}</h1>
+            </div>
+            <div className="text-left sm:text-right">
+              <p className="text-zinc-500 text-sm mb-1">Güncel Fiyat</p>
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-bold text-white">{fundData.currentPrice} ₺</span>
+                <span className="text-emerald-400 font-medium">{fundData.dailyChange}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Sol Taraf: Grafik Alanı */}
-          <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-8 flex flex-col justify-center items-center min-h-[350px]">
-            <svg className="w-12 h-12 text-zinc-700 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-            </svg>
-            <p className="text-zinc-400 font-medium text-sm">Gelişmiş Grafik Modülü</p>
-            <p className="text-zinc-600 text-xs mt-2">(İlerleyen aşamalarda buraya grafik eklenecek)</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 md:p-6 h-[400px]">
+            <h2 className="text-zinc-400 text-sm font-medium mb-6">Son 14 Günlük Performans</h2>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={fundData.chart} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="date" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin - 0.5', 'dataMax + 0.5']} tickFormatter={(value) => `₺${value.toFixed(2)}`} />
+                  <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }} itemStyle={{ color: '#22d3ee' }} />
+                  <Line type="monotone" dataKey="price" name="Fiyat" stroke="#22d3ee" strokeWidth={3} dot={{ r: 4, fill: '#22d3ee', strokeWidth: 0 }} activeDot={{ r: 6, fill: '#fff', stroke: '#22d3ee', strokeWidth: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Sağ Taraf: Fon İstatistikleri ve Aksiyon */}
-          <div className="space-y-6">
-            
-            {/* İstatistik Kartı - Yazılar zarifleştirildi */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-              <h3 className="text-base font-semibold text-zinc-100 mb-5 border-b border-zinc-800 pb-3">Fon Özeti</h3>
-              
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-400">Risk Değeri</span>
-                  <span className="font-medium text-white">{fund.riskValue}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-400">Aylık Getiri</span>
-                  <span className="font-medium text-emerald-400">{fund.monthlyReturn}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-400">Yıllık Getiri</span>
-                  <span className="font-medium text-emerald-400">{fund.yearlyReturn}</span>
-                </div>
+          <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-white font-medium mb-6">Fon Özeti</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-800/50">
+                <span className="text-zinc-500 text-sm">Risk Değeri</span>
+                <span className="text-white font-medium">{fundData.risk}</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-800/50">
+                <span className="text-zinc-500 text-sm">Aylık Getiri</span>
+                <span className="text-emerald-400 font-medium">{fundData.monthlyReturn}</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-800/50">
+                <span className="text-zinc-500 text-sm">Yıllık Getiri</span>
+                <span className="text-emerald-400 font-medium">{fundData.yearlyReturn}</span>
               </div>
             </div>
-
-            {/* Aksiyon Butonu - Boyutları dengelendi */}
-            <button className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg shadow-cyan-500/10 text-sm">
+            <button className="w-full mt-8 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors">
               Portföyüme Ekle
             </button>
-
           </div>
         </div>
       </div>
