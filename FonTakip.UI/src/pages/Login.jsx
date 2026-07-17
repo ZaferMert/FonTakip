@@ -1,96 +1,71 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Login() {
-  // Kullanıcının yazdığı bilgileri React'in hafızasında tutuyoruz (State)
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Butona basıldığında çalışacak fonksiyon
-  const handleLogin = (e) => {
-    e.preventDefault(); // Sayfanın yenilenmesini engeller
-    console.log("Giriş denemesi:", { username, password, rememberMe });
-    // İleride buraya Backend'e (Axios ile) istek atma kodumuzu yazacağız.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post('http://localhost:5043/api/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // ÇÖZÜM BURADA: C# Backend'den gelen veriyi her ihtimale karşı (Büyük/Küçük harf veya direkt metin) yakalıyoruz.
+      const actualToken = response.data.token || response.data.Token || response.data;
+      
+      // Yakaladığımız gerçek Token'ı tarayıcı hafızasına alıyoruz (Artık undefined olmayacak)
+      localStorage.setItem('token', actualToken);
+      
+      // Giriş başarılıysa piyasalar ekranına yönlendir
+      navigate('/funds');
+    } catch (err) {
+      setError(err.response?.data?.message || 'E-posta veya şifre hatalı.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    // Arka plan: Koyu antrasit/siyah tonları
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-      
-      {/* Form Kartı (Glassmorphism esintili, çok ince çerçeveli elit kutu) */}
-      <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-8">
-        
-        {/* Başlık Kısmı */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Giriş Yap</h1>
-          <p className="text-zinc-400 mt-2 text-sm">FonTakip portföyünüze erişin</p>
-        </div>
+    <div className="min-h-screen bg-zinc-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">Hesabına Giriş Yap</h2>
+      </div>
 
-        {/* Form Alanı */}
-        <form onSubmit={handleLogin} className="space-y-6">
-          
-          {/* Kullanıcı Adı Kutusu */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">Kullanıcı Adı</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors"
-              placeholder="Kullanıcı adınızı girin"
-              required
-            />
-          </div>
-
-          {/* Şifre Kutusu */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">Şifre</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          {/* Beni Hatırla & Şifremi Unuttum */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-zinc-900"
-              />
-              <label htmlFor="remember" className="ml-2 block text-sm text-zinc-400">
-                Beni hatırla
-              </label>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-zinc-900/50 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-zinc-800">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-md">{error}</div>}
+            
+            <div>
+              <label className="block text-sm font-medium text-zinc-300">E-posta Adresi</label>
+              <input type="email" required className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-800/50 py-2 px-3 text-white shadow-sm focus:border-cyan-500"
+                value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
             </div>
-            <a href="#" className="text-sm font-medium text-cyan-500 hover:text-cyan-400 transition-colors">
-              Şifremi unuttum
-            </a>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-300">Şifre</label>
+              <input type="password" required className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-800/50 py-2 px-3 text-white shadow-sm focus:border-cyan-500"
+                value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} />
+            </div>
+
+            <button type="submit" disabled={isLoading} className="flex w-full justify-center rounded-md border border-transparent bg-cyan-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-cyan-500">
+              {isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+            </button>
+          </form>
+          <div className="mt-6 text-center text-sm">
+            <span className="text-zinc-400">Hesabın yok mu? </span>
+            <Link to="/register" className="font-medium text-cyan-500 hover:text-cyan-400">Hemen Kayıt Ol</Link>
           </div>
-
-          {/* Giriş Yap Butonu */}
-          <button
-            type="submit"
-            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
-          >
-            Giriş Yap
-          </button>
-        </form>
-
-        {/* Kayıt Ol Sayfasına Yönlendirme (Henüz sayfa yok ama linki hazır) */}
-        <p className="mt-8 text-center text-sm text-zinc-400">
-          Henüz hesabınız yok mu?{' '}
-          <Link to="/register" className="font-semibold text-white hover:text-cyan-400 transition-colors">
-            Kayıt Ol
-          </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

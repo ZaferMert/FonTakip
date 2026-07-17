@@ -1,30 +1,31 @@
-using Microsoft.EntityFrameworkCore;
 using FonTakip.API.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace FonTakip.API.Data
+namespace FonTakip.API.Data 
 {
-    // Sınıfımızın EF Core'un DbContext altyapısından miras almasını sağlıyoruz
     public class AppDbContext : DbContext
     {
-        // Constructor: Proje başlarken veritabanı ayarlarını (şifre, port vb.) içeri almamızı sağlar
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // C# modellerimizi SQL Server'daki fiziksel tablolara eşleyen köprüler
         public DbSet<Fund> Funds { get; set; }
-        public DbSet<FundPrice> FundPrices { get; set; }
         public DbSet<User> Users { get; set; }
+        // Unuttuğumuz tabloyu geri ekliyoruz:
+        public DbSet<FundPrice> FundPrices { get; set; } 
+        // Yeni tablomuz:
+        public DbSet<UserFavorite> UserFavorites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Bire-Çok (One-to-Many) İlişkinin C# dilinde kurumsal tanımı:
-            modelBuilder.Entity<FundPrice>()
-                .HasOne(fp => fp.Fund)          // Bir fiyatın TEK BİR fonu vardır.
-                .WithMany(f => f.Prices)        // Bir fonun BİRDEN ÇOK fiyatı olabilir.
-                .HasForeignKey(fp => fp.FundId); // Aralarındaki bağlantı köprüsü "FundId" numarasıdır.
-
             base.OnModelCreating(modelBuilder);
+
+            // ÖN YÜZDEKİ VERİLERİ VERİTABANINA SABİTLİYORUZ
+            // Sadece sabit verileri (Id, Code, Name) veritabanına ekliyoruz.
+            modelBuilder.Entity<Fund>().HasData(
+                new Fund { Id = 1, Code = "MAC", Name = "Marmara Capital Hisse Senedi Fonu" },
+                new Fund { Id = 2, Code = "AFT", Name = "Ak Portföy Teknoloji Şirketleri Fonu" },
+                new Fund { Id = 3, Code = "YAF", Name = "Yapı Kredi Altın Fonu" },
+                new Fund { Id = 4, Code = "NNF", Name = "Hedef Portföy Birinci Hisse Senedi Fonu" }
+            );
         }
     }
 }

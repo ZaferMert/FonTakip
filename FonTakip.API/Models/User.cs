@@ -4,12 +4,12 @@ namespace FonTakip.API.Models
     {
         public int Id { get; set; }
         
-        // AuthService'in aradığı eksik özellikler eklendi
-        public string Username { get; set; } = string.Empty;
+        // Username'i tamamen kaldırdık.
         public string Role { get; set; } = string.Empty; 
 
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
+        // Frontend'deki (React) formData.fullName ile eşleşmesi için birleştirdik:
+        public string FullName { get; set; } = string.Empty; 
+        
         public string Email { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;

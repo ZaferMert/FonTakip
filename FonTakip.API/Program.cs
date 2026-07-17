@@ -72,6 +72,17 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// CORS politikasını ekliyoruz: Frontend'in (5173) bize istek atmasına izin ver
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // React'in çalıştığı port
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // --- 2. RESTORAN KURALLARI (Middleware) ---
@@ -84,6 +95,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Eklediğimiz CORS politikasını aktif ediyoruz
+app.UseCors("AllowReactApp");
 
 // Güvenlik Şefimizi devreye alıyoruz (Tüm istekleri o karşılayacak)
 app.UseMiddleware<ExceptionMiddleware>();

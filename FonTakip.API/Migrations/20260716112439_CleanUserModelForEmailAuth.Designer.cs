@@ -4,6 +4,7 @@ using FonTakip.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FonTakip.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716112439_CleanUserModelForEmailAuth")]
+    partial class CleanUserModelForEmailAuth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,40 +51,6 @@ namespace FonTakip.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Funds");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Category = "",
-                            Code = "MAC",
-                            IsActive = true,
-                            Name = "Marmara Capital Hisse Senedi Fonu"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Category = "",
-                            Code = "AFT",
-                            IsActive = true,
-                            Name = "Ak Portföy Teknoloji Şirketleri Fonu"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Category = "",
-                            Code = "YAF",
-                            IsActive = true,
-                            Name = "Yapı Kredi Altın Fonu"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Category = "",
-                            Code = "NNF",
-                            IsActive = true,
-                            Name = "Hedef Portföy Birinci Hisse Senedi Fonu"
-                        });
                 });
 
             modelBuilder.Entity("FonTakip.API.Models.FundPrice", b =>
@@ -145,26 +114,18 @@ namespace FonTakip.API.Migrations
 
             modelBuilder.Entity("FonTakip.API.Models.UserFavorite", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("FundId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "FundId");
 
                     b.HasIndex("FundId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserFavorites");
                 });

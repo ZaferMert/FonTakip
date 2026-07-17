@@ -6,15 +6,12 @@ export default function FundList() {
   // Yeni: Kullanıcının seçtiği görünüm modunu hafızada tutuyoruz (Varsayılan: grid)
   const [viewMode, setViewMode] = useState('grid'); 
 
+  // VERİTABANI İLE %100 EŞLEŞEN MOCK VERİLER (Id değerlerine dikkat)
   const dummyFunds = [
     { id: 1, code: 'MAC', name: 'Marmara Capital Hisse Senedi Fonu', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
-    { id: 2, code: 'TCD', name: 'Tacirler Portföy Değişken Fon', price: '45.10 ₺', trend: '-1.2%', isPositive: false },
-    { id: 3, code: 'NNF', name: 'Hedef Portföy Hisse Senedi Fonu', price: '8.75 ₺', trend: '+5.1%', isPositive: true },
-    { id: 4, code: 'YAS', name: 'Yapı Kredi Koç Holding İştirak Fonu', price: '112.30 ₺', trend: '+0.8%', isPositive: true },
-    { id: 5, code: 'AFT', name: 'Ak Portföy Yeni Teknolojiler Fonu', price: '34.20 ₺', trend: '-3.4%', isPositive: false },
-    { id: 6, code: 'IPB', name: 'İstanbul Portföy Birinci Değişken Fon', price: '12.45 ₺', trend: '+1.1%', isPositive: true },
-    { id: 7, code: 'YKT', name: 'Yapı Kredi Portföy Teknoloji Fonu', price: '88.10 ₺', trend: '+0.2%', isPositive: true },
-    { id: 8, code: 'OJT', name: 'QNB Finans Portföy Teknoloji', price: '15.30 ₺', trend: '-0.5%', isPositive: false },
+    { id: 2, code: 'AFT', name: 'Ak Portföy Teknoloji Şirketleri Fonu', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
+    { id: 3, code: 'YAF', name: 'Yapı Kredi Altın Fonu', price: '112.40 ₺', trend: '-0.5%', isPositive: false },
+    { id: 4, code: 'NNF', name: 'Hedef Portföy Birinci Hisse Senedi Fonu', price: '8.75 ₺', trend: '+3.1%', isPositive: true }
   ];
 
   const filteredFunds = dummyFunds.filter(fund => 
