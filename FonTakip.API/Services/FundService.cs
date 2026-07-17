@@ -78,5 +78,22 @@ namespace FonTakip.API.Services
             _context.SaveChanges();
 
         }
+
+        // GET: Belirli tarih aralığına göre fon fiyatlarını getirme metodu
+        public List<FundPrice> GetPricesByDateRange(int fundId, DateTime startDate, DateTime endDate)
+        {
+            // Veritabanındaki FundPrices tablosuna in, 
+            // 1. İlgili fonu bul (fp.FundId == fundId)
+            // 2. Başlangıç tarihinden büyük veya eşit olanları al (fp.Date >= startDate)
+            // 3. Bitiş tarihinden küçük veya eşit olanları al (fp.Date <= endDate)
+            // 4. Grafikte düzgün görünmesi için tarihe göre sırala (OrderBy)
+            
+            var prices = _context.FundPrices
+                .Where(fp => fp.FundId == fundId && fp.Date.Date >= startDate.Date && fp.Date.Date <= endDate.Date)
+                .OrderBy(fp => fp.Date)
+                .ToList();
+
+            return prices;
+        }
     }
 }

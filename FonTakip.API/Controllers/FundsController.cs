@@ -109,5 +109,21 @@ namespace FonTakip.API.Controllers
 
             return Ok("Fiyat başarıyla eklendi.");
         }
+
+        // 6. GET: Belirli tarih aralığına göre fon fiyatlarını getirme kapısı
+        // Adres Örneği: GET /api/funds/1/prices?startDate=2026-06-01&endDate=2026-07-01
+        [HttpGet("{fundId}/prices")]
+        public IActionResult GetPricesByDateRange(int fundId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            // Bu metodu birazdan Servis katmanında yazacağız!
+            var prices = _fundService.GetPricesByDateRange(fundId, startDate, endDate);
+
+            if (prices == null || !prices.Any())
+            {
+                return NotFound("Bu tarih aralığında fiyata ait veri bulunamadı.");
+            }
+
+            return Ok(prices);
+        }
     }
 }

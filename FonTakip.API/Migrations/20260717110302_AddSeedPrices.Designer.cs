@@ -4,6 +4,7 @@ using FonTakip.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FonTakip.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260717110302_AddSeedPrices")]
+    partial class AddSeedPrices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,46 +153,6 @@ namespace FonTakip.API.Migrations
                             Date = new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FundId = 1,
                             Price = 14.52m
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ChangeRate = 0m,
-                            Date = new DateTime(2026, 6, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FundId = 2,
-                            Price = 26.10m
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ChangeRate = 2.6m,
-                            Date = new DateTime(2026, 6, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FundId = 2,
-                            Price = 26.80m
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ChangeRate = 2.6m,
-                            Date = new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FundId = 2,
-                            Price = 27.50m
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ChangeRate = 1.8m,
-                            Date = new DateTime(2026, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FundId = 2,
-                            Price = 28.00m
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ChangeRate = 1.0m,
-                            Date = new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FundId = 2,
-                            Price = 28.30m
                         });
                 });
 
