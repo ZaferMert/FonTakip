@@ -21,9 +21,7 @@ export default function Portfolio() {
         const response = await axios.get('http://localhost:5043/api/portfolios', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
-        // BÜYÜK KURTARICI: C# ve React arasındaki olası harf uyuşmazlığını çözüyoruz
-        // Eğer küçük harfli gelmezse (undefined olursa), Büyük harfli olanı al, o da yoksa 0 veya '-' koy.
+
         const safeData = response.data.map(item => ({
           id: item.id || item.Id,
           fundId: item.fundId || item.FundId,
@@ -46,7 +44,6 @@ export default function Portfolio() {
     fetchPortfolio();
   }, []);
 
-  // --- HESAPLAMALAR ---
   const totalInvestment = portfolioItems.reduce((acc, item) => acc + item.totalCost, 0);
 
   const chartData = portfolioItems.map(item => ({
@@ -94,10 +91,8 @@ export default function Portfolio() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* SOL KISIM: Özet Kartları ve Pasta Grafik */}
             <div className="lg:col-span-1 space-y-6">
-              
-              {/* Toplam Bakiye Kartı */}
+
               <div className="bg-gradient-to-br from-cyan-950/40 to-zinc-900/40 border border-cyan-900/30 rounded-2xl p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <svg className="w-24 h-24 text-cyan-500" fill="currentColor" viewBox="0 0 24 24">
@@ -116,7 +111,6 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* Dağılım Grafiği (Pasta) */}
               <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 h-[300px] flex flex-col">
                 <h3 className="text-zinc-400 text-sm font-medium mb-4">Varlık Dağılımı</h3>
                 <div className="flex-1 w-full">
@@ -148,7 +142,6 @@ export default function Portfolio() {
 
             </div>
 
-            {/* SAĞ KISIM: Sahip Olunan Fonların Listesi */}
             <div className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col">
               <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
                 <h3 className="text-white font-medium">Fonlarım</h3>

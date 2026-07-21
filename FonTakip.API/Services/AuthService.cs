@@ -25,7 +25,7 @@ namespace FonTakip.API.Services
 
             var newUser = new User
             {
-                FullName = request.FullName, // EKSİK GİDERİLDİ: Arayüzden gelen ismi kaydettik
+                FullName = request.FullName,
                 Email = request.Email,
                 PasswordHash = passwordHash,
                 Role = "User" 
@@ -55,14 +55,13 @@ namespace FonTakip.API.Services
             return CreateToken(user);
         }
 
-        // YAKA KARTI BASIM MAKİNESİ
         private string CreateToken(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // EKSİK GİDERİLDİ: ID'yi Token'a gömdük
-                new Claim(ClaimTypes.Email, user.Email),                  // E-posta standardı
-                new Claim(ClaimTypes.Name, user.FullName),                // İsim bilgisini de Token'a gömdük
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Role, user.Role)
             };
 

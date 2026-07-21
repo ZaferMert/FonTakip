@@ -17,7 +17,7 @@ namespace FonTakip.API.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // --- 1. DECIMAL HASSASİYET AYARLARI (Sarı uyarıları çözen kısım) ---
+            // --- 1. DECIMAL HASSASİYET AYARLARI ---
             modelBuilder.Entity<FundPrice>()
                 .Property(f => f.Price)
                 .HasPrecision(18, 6);
@@ -35,7 +35,7 @@ namespace FonTakip.API.Data
                 .HasPrecision(18, 3);
             // -------------------------------------------------------------------
 
-            // --- 2. ÖN YÜZDEKİ VERİLERİ VERİTABANINA SABİTLİYORUZ (Senin Kodların) ---
+            // --- 2. ÖN YÜZDEKİ VERİLERİ VERİTABANINA SABİTLİYORUZ ---
             modelBuilder.Entity<Fund>().HasData(
                 new Fund { Id = 1, Code = "MAC", Name = "Marmara Capital Hisse Senedi Fonu" },
                 new Fund { Id = 2, Code = "AFT", Name = "Ak Portföy Teknoloji Şirketleri Fonu" },

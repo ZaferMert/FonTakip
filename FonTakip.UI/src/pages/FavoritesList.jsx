@@ -7,7 +7,6 @@ export default function FavoritesList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Veritabanımızdaki 4 fon ile birebir eşleşen mock listemiz
   const allMockFunds = [
     { id: 1, name: "Marmara Capital Hisse Senedi Fonu", code: "MAC", price: 14.52, change: "+2.4%", risk: 6 },
     { id: 2, name: "Ak Portföy Teknoloji Şirketleri Fonu", code: "AFT", price: 28.30, change: "+1.8%", risk: 7 },
@@ -24,12 +23,11 @@ export default function FavoritesList() {
         return;
       }
 
-      // Backend'den favori fonlarımızın ID'lerini çekiyoruz
       const response = await axios.get('http://localhost:5043/api/favorites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      setFavoriteIds(response.data); // Örn: [1, 3]
+      setFavoriteIds(response.data);
     } catch (err) {
       console.error("Favoriler alınamadı:", err);
       setError("Favorileriniz yüklenirken bir sorun oluştu.");
@@ -45,18 +43,15 @@ export default function FavoritesList() {
   const removeFavorite = async (fundId) => {
     try {
       const token = localStorage.getItem('token');
-      // Kalbi boşaltmak için aynı endpoint'e tekrar POST atıyoruz (Toggle mantığı)
       await axios.post(`http://localhost:5043/api/favorites/${fundId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Listeden anında kaldırarak ekranı güncelliyoruz
       setFavoriteIds(favoriteIds.filter(id => id !== fundId));
     } catch (err) {
       alert("Fon favorilerden çıkarılamadı.");
     }
   };
 
-  // Favori ID'lerine göre ekranda gösterilecek fonları filtrele
   const favoriteFunds = allMockFunds.filter(fund => favoriteIds.includes(fund.id));
 
   if (isLoading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-cyan-500">Yükleniyor...</div>;
@@ -100,7 +95,7 @@ export default function FavoritesList() {
                   </div>
                 </div>
                 <Link to={`/funds/${fund.id}`} className="absolute inset-0 z-0"></Link>
-                <div className="relative z-10">{/* Butonlara tıklanabilmesi için z-index ayarı */}</div>
+                <div className="relative z-10"></div>
               </div>
             ))}
           </div>

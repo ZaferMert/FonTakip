@@ -21,7 +21,6 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/funds" element={<FundList />} />
         <Route path="/funds/:id" element={<FundDetail />} />
-        {/* YENİ: Favoriler rotasını tanımladık */}
         <Route path="/favorites" element={<FavoritesList />} /> 
         <Route path="/compare" element={<CompareFunds />} />
         <Route path="/admin" element={

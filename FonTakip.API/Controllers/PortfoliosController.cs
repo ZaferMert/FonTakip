@@ -9,7 +9,7 @@ namespace FonTakip.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Bu controller'daki tüm işlemlere sadece giriş yapmış kullanıcılar erişebilir
+    [Authorize]
     public class PortfoliosController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -23,7 +23,6 @@ namespace FonTakip.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPortfolio()
         {
-            // Token'dan giriş yapan kullanıcının ID'sini alıyoruz
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
@@ -32,7 +31,7 @@ namespace FonTakip.API.Controllers
             }
 
             var portfolio = await _context.PortfolioItems
-                .Include(p => p.Fund) // Fonun adını ve kodunu da getirmek için
+                .Include(p => p.Fund)
                 .Where(p => p.UserId == userId)
                 .Select(p => new
                 {
@@ -42,8 +41,6 @@ namespace FonTakip.API.Controllers
                     FundName = p.Fund.Name,
                     p.Shares,
                     p.AverageCost,
-                    // Eğer canlı fiyat API'niz hazırsa buraya güncel fiyat da eklenebilir. 
-                    // Şimdilik sadece maliyet bilgisini dönüyoruz.
                     TotalCost = p.Shares * p.AverageCost 
                 })
                 .ToListAsync();
@@ -62,20 +59,17 @@ namespace FonTakip.API.Controllers
                 return Unauthorized("Kullanıcı kimliği doğrulanamadı.");
             }
 
-            // Eklenmek istenen fon veritabanında var mı kontrolü
             var fundExists = await _context.Funds.AnyAsync(f => f.Id == request.FundId);
             if (!fundExists)
             {
                 return NotFound("Belirtilen fon bulunamadı.");
             }
 
-            // Kullanıcının cüzdanında bu fon zaten var mı kontrolü
             var existingItem = await _context.PortfolioItems
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.FundId == request.FundId);
 
             if (existingItem != null)
             {
-                // Eğer fon zaten varsa, üzerine ekleme yapıp ortalama maliyeti güncelliyoruz
                 var totalCostBefore = existingItem.Shares * existingItem.AverageCost;
                 var additionalCost = request.Shares * request.Price;
                 var newTotalShares = existingItem.Shares + request.Shares;
@@ -85,7 +79,6 @@ namespace FonTakip.API.Controllers
             }
             else
             {
-                // Fon cüzdanda yoksa yeni bir kayıt oluşturuyoruz
                 var newItem = new PortfolioItem
                 {
                     UserId = userId,
@@ -101,11 +94,10 @@ namespace FonTakip.API.Controllers
         }
     }
 
-    // İstek gövdesini (Body) karşılamak için küçük bir DTO (Data Transfer Object)
     public class AddToPortfolioRequest
     {
         public int FundId { get; set; }
         public decimal Shares { get; set; }
-        public decimal Price { get; set; } // İşlem anındaki fiyat
+        public decimal Price { get; set; }
     }
 }

@@ -8,36 +8,31 @@ export default function Register() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- GELİŞMİŞ VALİDASYON KONTROLLERİ ---
   const validateForm = () => {
-    // 1. Ad Soyad Kontrolü
     if (formData.fullName.trim().length < 3) {
       return 'Ad Soyad en az 3 karakter olmalıdır.';
     }
 
-    // 2. E-posta Format Kontrolü (Regex)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       return 'Lütfen geçerli bir e-posta adresi giriniz.';
     }
 
-    // 3. Gelişmiş Şifre Kontrolü (En az 8 karakter, 1 Büyük, 1 Küçük, 1 Rakam)
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\W]{8,}$/;
     if (!passwordRegex.test(formData.password)) {
       return 'Şifre en az 8 karakter olmalı, en az 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir.';
     }
 
-    return null; // Hata yoksa null dön
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // API isteği atmadan önce formu kendi içimizde denetliyoruz
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
-      return; // Hata varsa kodu burada kes, API'ye gitme
+      return;
     }
 
     setError('');

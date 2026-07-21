@@ -5,7 +5,6 @@ export default function FundList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); 
 
-  // SENİN ORİJİNAL VERİLERİN (Sadece 'category' eklendi)
   const dummyFunds = [
     { id: 1, code: 'MAC', name: 'Marmara Capital Hisse Senedi Fonu', category: 'Hisse Senedi', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
     { id: 2, code: 'AFT', name: 'Ak Portföy Teknoloji Şirketleri Fonu', category: 'Teknoloji', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
@@ -96,7 +95,6 @@ export default function FundList() {
                   {fund.name}
                 </h2>
 
-                {/* KATEGORİ BURAYA EKLENDİ (Grid Görünümü) */}
                 {fund.category && (
                   <div className="mb-4">
                     <span className="inline-block mt-1 text-[10px] font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
@@ -139,7 +137,6 @@ export default function FundList() {
                     <p className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors truncate">
                       {fund.name}
                     </p>
-                    {/* KATEGORİ BURAYA EKLENDİ (Liste Görünümü) */}
                     {fund.category && (
                       <span className="inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
                         {fund.category}

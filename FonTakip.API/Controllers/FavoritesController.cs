@@ -9,7 +9,7 @@ namespace FonTakip.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Bu sınıftaki işlemleri sadece giriş yapmış (token'ı olan) kullanıcılar yapabilir
+    [Authorize]
     public class FavoritesController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -20,12 +20,10 @@ namespace FonTakip.API.Controllers
         }
 
         // 1. GET: /api/favorites
-        // Kullanıcının favoriye aldığı fonların SADECE ID'lerini liste olarak döner. 
-        // (UI tarafında hangi kalplerin dolu olacağını bilmek için bu yeterlidir)
+        // Kullanıcının favoriye aldığı fonların SADECE ID'lerini liste olarak döner.
         [HttpGet]
         public async Task<IActionResult> GetFavorites()
         {
-            // JWT Token içinden kullanıcının ID'sini yakalıyoruz
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdStr)) return Unauthorized();
             
@@ -40,7 +38,7 @@ namespace FonTakip.API.Controllers
         }
 
         // 2. POST: /api/favorites/{fundId}
-        // Kalp ikonuna basıldığında tetiklenir. Fon favorilerdeyse siler, değilse ekler (Toggle mantığı).
+        // Kalp ikonuna basıldığında tetiklenir. Fon favorilerdeyse siler, değilse ekler.
         [HttpPost("{fundId}")]
         public async Task<IActionResult> ToggleFavorite(int fundId)
         {
@@ -49,13 +47,11 @@ namespace FonTakip.API.Controllers
 
             int userId = int.Parse(userIdStr);
 
-            // Bu kullanıcı bu fonu daha önce favoriye eklemiş mi diye veritabanına bak
             var existingFavorite = await _context.UserFavorites
                 .FirstOrDefaultAsync(uf => uf.UserId == userId && uf.FundId == fundId);
 
             if (existingFavorite != null)
             {
-                // Zaten favorilerdeyse, tablodan sil (Kalbi boşalt)
                 _context.UserFavorites.Remove(existingFavorite);
                 await _context.SaveChangesAsync();
                 
@@ -63,7 +59,6 @@ namespace FonTakip.API.Controllers
             }
             else
             {
-                // Favorilerde yoksa, tabloya yeni kayıt olarak ekle (Kalbi doldur)
                 var newFavorite = new UserFavorite
                 {
                     UserId = userId,

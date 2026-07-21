@@ -4,7 +4,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
-// YENİ: Merkezi API dosyamızı içeri aktarıyoruz (axios yerine artık bunu kullanacağız)
 import api from '../api'; 
 
 export default function FundDetail() {
@@ -32,8 +31,6 @@ export default function FundDetail() {
         const token = localStorage.getItem('token');
         if (!token) return; 
 
-        // ESKİDEN: await axios.get('http://localhost:5043/api/favorites', { headers: ... })
-        // ŞİMDİ: Sadece adresi yazıyoruz, Token'ı api.js arka planda otomatik ekliyor!
         const response = await api.get('/favorites');
         setIsFavorite(response.data.includes(Number(id)));
       } catch (err) {
@@ -51,7 +48,6 @@ export default function FundDetail() {
         return;
       }
 
-      // ŞİMDİ: Tertemiz, sadece isteği atıyoruz.
       const response = await api.post(`/favorites/${id}`);
       setIsFavorite(response.data.isFavorite);
     } catch (err) {
@@ -68,7 +64,6 @@ export default function FundDetail() {
         const formattedStart = startDate.toISOString().split('T')[0];
         const formattedEnd = endDate.toISOString().split('T')[0];
 
-        // ŞİMDİ: URL'ler çok daha okunabilir ve kısa!
         const [fundInfoResponse, pricesResponse] = await Promise.all([
           api.get(`/funds`),
           api.get(`/funds/${id}/prices?startDate=${formattedStart}&endDate=${formattedEnd}`)
@@ -128,8 +123,7 @@ export default function FundDetail() {
         setIsSubmitting(false);
         return;
       }
-
-      // ŞİMDİ: Body parametresini veriyoruz, yetkilendirmeyi api.js hallediyor.
+      
       await api.post('/portfolios', {
         fundId: Number(id),
         shares: Number(shares),

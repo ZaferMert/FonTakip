@@ -10,10 +10,9 @@ export default function Admin() {
 
   const [funds, setFunds] = useState([]);
   
-  // 1. FORM STATE'İ GÜNCELLENDİ (Artık id bilgisini de tutuyoruz)
   const [formData, setFormData] = useState({ id: null, name: '', code: '', risk: 1, category: 'Hisse Senedi' });
   const [formError, setFormError] = useState('');
-  const [isEditing, setIsEditing] = useState(false); // Sistem şu an ekleme mi yapıyor, güncelleme mi?
+  const [isEditing, setIsEditing] = useState(false); 
 
   useEffect(() => {
     fetchFunds();
@@ -28,7 +27,6 @@ export default function Admin() {
     }
   };
 
-  // 2. HEM EKLEME HEM GÜNCELLEME YAPAN ORTAK METOT
   const handleSaveFund = async (e) => {
     e.preventDefault();
 
@@ -59,15 +57,11 @@ export default function Admin() {
       };
 
       if (isEditing) {
-        // GÜNCELLEME MODU (PUT İsteği)
-        // C# API'miz PUT isteğinde modelin içinde ID'yi de bekler
         await axios.put(`http://localhost:5043/api/funds/${formData.id}`, { ...payload, id: formData.id }, config);
       } else {
-        // YENİ EKLEME MODU (POST İsteği)
         await axios.post('http://localhost:5043/api/funds', payload, config);
       }
       
-      // İşlem başarılı olunca formu tamamen sıfırla
       setFormData({ id: null, name: '', code: '', risk: 1, category: 'Hisse Senedi' });
       setIsEditing(false);
       fetchFunds();
@@ -77,7 +71,6 @@ export default function Admin() {
     }
   };
 
-  // 3. TABLODAKİ "DÜZENLE" BUTONUNA BASILINCA ÇALIŞACAK METOT
   const handleEditClick = (fund) => {
     setFormData({
       id: fund.id,
@@ -86,11 +79,10 @@ export default function Admin() {
       risk: fund.risk,
       category: fund.category || 'Hisse Senedi'
     });
-    setIsEditing(true); // Modu güncelleme olarak değiştir
+    setIsEditing(true);
     setFormError('');
   };
 
-  // 4. GÜNCELLEMEDEN VAZGEÇİLDİĞİNDE FORMU SIFIRLAYACAK METOT
   const handleCancelEdit = () => {
     setFormData({ id: null, name: '', code: '', risk: 1, category: 'Hisse Senedi' });
     setIsEditing(false);
@@ -247,7 +239,7 @@ export default function Admin() {
                       <td className="px-4 py-3 text-zinc-200">{fund.name}</td>
                       <td className="px-4 py-3">{fund.category || '-'}</td>
                       <td className="px-4 py-3 text-right flex justify-end gap-2">
-                        {/* DÜZENLE BUTONU EKLENDİ */}
+                        {/* DÜZENLE BUTONU */}
                         <button 
                           onClick={() => handleEditClick(fund)}
                           className="text-cyan-500 hover:text-cyan-400 font-medium text-xs px-3 py-1 border border-cyan-500/30 rounded-md hover:bg-cyan-500/10 transition-colors"

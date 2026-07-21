@@ -7,10 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Harici şifreleme paketi olduğu için sürümü farklıdır, sabit kalır -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     
-    <!-- Microsoft .NET 8 Çekirdek Paketleri -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
     
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
@@ -25,7 +23,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     
-    <!-- Swagger için en kararlı 6.x sürümü -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 

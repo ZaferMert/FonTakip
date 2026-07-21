@@ -5,17 +5,13 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function CompareFunds() {
-  // Seçili Fon ID'leri (Veritabanındaki ID'ler: 1=MAC, 2=AFT, 3=YAF, 4=NNF)
   const [fund1Id, setFund1Id] = useState('1'); 
   const [fund2Id, setFund2Id] = useState('2');
 
-  // Arayüz ilk yüklendiğinde otomatik olarak bugünü hesapla
   const bitisTarihi = new Date(); 
-
   const baslangicTarihi = new Date();
-  baslangicTarihi.setMonth(bitisTarihi.getMonth() - 1); // 1 Ay öncesi
+  baslangicTarihi.setMonth(bitisTarihi.getMonth() - 1);
 
-  // Karşılaştırma ekranındaki State'lere bu dinamik tarihleri ver
   const [startDate, setStartDate] = useState(baslangicTarihi);
   const [endDate, setEndDate] = useState(bitisTarihi);
 
@@ -23,7 +19,6 @@ export default function CompareFunds() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Veritabanımızdaki 4 Fonun Sabit Bilgileri (İleride API'den çekilebilir)
   const fundDetails = {
     '1': { name: "Marmara Capital Hisse Senedi", code: "MAC", risk: 6, return: "%112.4", color: "#22d3ee" }, // Cyan
     '2': { name: "Ak Portföy Teknoloji", code: "AFT", risk: 7, return: "%145.2", color: "#a855f7" }, // Purple
@@ -39,13 +34,11 @@ export default function CompareFunds() {
         const formattedStart = startDate.toISOString().split('T')[0];
         const formattedEnd = endDate.toISOString().split('T')[0];
 
-        // İki fonun verisini AYNI ANDA çekiyoruz (Promise.all ile paralel ve hızlı çalışır)
         const [res1, res2] = await Promise.all([
           axios.get(`http://localhost:5043/api/funds/${fund1Id}/prices?startDate=${formattedStart}&endDate=${formattedEnd}`),
           axios.get(`http://localhost:5043/api/funds/${fund2Id}/prices?startDate=${formattedStart}&endDate=${formattedEnd}`)
         ]);
 
-        // Gelen iki farklı listeyi, tarihlere göre tek bir objede birleştiriyoruz (Recharts'ın anlayacağı format)
         const mergedDataMap = {};
 
         res1.data.forEach(item => {
@@ -59,7 +52,6 @@ export default function CompareFunds() {
           mergedDataMap[d].Fund2 = item.price;
         });
 
-        // Objeyi Recharts için diziye (array) çeviriyoruz
         const finalChartData = Object.values(mergedDataMap);
         
         if (finalChartData.length === 0) {
@@ -83,10 +75,8 @@ export default function CompareFunds() {
       <div className="max-w-[1200px] mx-auto">
         <h1 className="text-2xl font-medium tracking-tight text-zinc-100 mb-8">Fon Karşılaştırma</h1>
 
-        {/* KONTROL PANELİ: Fon Seçimi ve Tarih */}
         <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6 items-center justify-between">
           
-          {/* Fon 1 Seçimi */}
           <div className="w-full md:w-1/3">
             <label className="block text-xs font-medium text-zinc-500 mb-2">1. Fon (Ana Fon)</label>
             <select 
@@ -105,7 +95,6 @@ export default function CompareFunds() {
             <span className="text-zinc-500 font-bold text-sm">VS</span>
           </div>
 
-          {/* Fon 2 Seçimi */}
           <div className="w-full md:w-1/3">
             <label className="block text-xs font-medium text-zinc-500 mb-2">2. Fon (Karşılaştırılan)</label>
             <select 
@@ -120,7 +109,6 @@ export default function CompareFunds() {
             </select>
           </div>
 
-          {/* Tarih Seçimi (Date Picker) */}
           <div className="w-full md:w-auto mt-4 md:mt-0 md:pl-6 md:border-l border-zinc-800">
             <label className="block text-xs font-medium text-zinc-500 mb-2">Tarih Aralığı</label>
             <div className="flex items-center bg-zinc-950 border border-zinc-800 px-3 py-2.5 rounded-lg gap-2">
@@ -131,7 +119,6 @@ export default function CompareFunds() {
           </div>
         </div>
 
-        {/* GRAFİK VE ÖZET ALANI */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 h-[500px]">
              {isLoading ? (
@@ -147,7 +134,6 @@ export default function CompareFunds() {
                     <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }} />
                     <Legend verticalAlign="top" height={36} iconType="circle" />
                     
-                    {/* Dinamik Renklerle İki Çizgi */}
                     <Line type="monotone" dataKey="Fund1" name={fundDetails[fund1Id].code} stroke={fundDetails[fund1Id].color} strokeWidth={3} dot={{ r: 4, strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 2 }} />
                     <Line type="monotone" dataKey="Fund2" name={fundDetails[fund2Id].code} stroke={fundDetails[fund2Id].color} strokeWidth={3} dot={{ r: 4, strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 2 }} />
                   </LineChart>
@@ -156,7 +142,6 @@ export default function CompareFunds() {
           </div>
 
           <div className="space-y-6">
-            {/* Fon 1 Özet Kutusu */}
             <div className={`bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 border-t-4`} style={{ borderTopColor: fundDetails[fund1Id].color }}>
               <div className="text-xs font-bold text-zinc-500 mb-1">{fundDetails[fund1Id].code}</div>
               <h3 className="text-white font-medium mb-4 text-sm leading-tight">{fundDetails[fund1Id].name}</h3>
@@ -166,7 +151,6 @@ export default function CompareFunds() {
               </div>
             </div>
 
-            {/* Fon 2 Özet Kutusu */}
             <div className={`bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 border-t-4`} style={{ borderTopColor: fundDetails[fund2Id].color }}>
               <div className="text-xs font-bold text-zinc-500 mb-1">{fundDetails[fund2Id].code}</div>
               <h3 className="text-white font-medium mb-4 text-sm leading-tight">{fundDetails[fund2Id].name}</h3>

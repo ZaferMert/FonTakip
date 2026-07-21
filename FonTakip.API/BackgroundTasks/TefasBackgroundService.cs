@@ -33,11 +33,10 @@ namespace FonTakip.API.BackgroundTasks
 
                 var aktifFonlar = dbContext.Funds.Where(f => f.IsActive).ToList();
 
-                // --- 1. ADIM: AKILLI TEMİZLİK (Önceki spam verileri temizle) ---
                 foreach (var fon in aktifFonlar)
                 {
                     var fiyatSayisi = dbContext.Set<FundPrice>().Count(fp => fp.FundId == fon.Id);
-                    // Eğer bir fonun 25'ten fazla kaydı varsa, önceki testlerden kirlenmiş demektir
+                    
                     if (fiyatSayisi > 25)
                     {
                         var silinecekler = dbContext.Set<FundPrice>().Where(fp => fp.FundId == fon.Id).ToList();
@@ -47,7 +46,6 @@ namespace FonTakip.API.BackgroundTasks
                 }
                 await dbContext.SaveChangesAsync(stoppingToken);
 
-                // --- 2. ADIM: EKSİK OLAN 20 GÜNLÜK GEÇMİŞ VERİYİ OLUŞTURMA ---
                 foreach (var fon in aktifFonlar)
                 {
                     bool gecmisVeriVarMi = dbContext.Set<FundPrice>().Any(fp => fp.FundId == fon.Id);
@@ -67,7 +65,7 @@ namespace FonTakip.API.BackgroundTasks
                             {
                                 FundId = fon.Id,
                                 Price = baslangicFiyati,
-                                Date = DateTime.Today.AddDays(-i) // Geçmiş tarihler net saat olmadan eklenir
+                                Date = DateTime.Today.AddDays(-i)
                             });
                         }
                     }
@@ -76,7 +74,6 @@ namespace FonTakip.API.BackgroundTasks
                 _logger.LogInformation("Tarihçe veri kontrolü tamamlandı.");
             }
             
-            // --- 3. ADIM: CANLI BİR BORSAYMIŞ GİBİ GÜNCEL VERİ EKLEMEYE/GÜNCELLEMEYE DEVAM ET ---
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -100,7 +97,6 @@ namespace FonTakip.API.BackgroundTasks
                                 decimal yeniFiyat = baslangicFiyati * (1 + (decimal)(degisimOrani / 100));
                                 yeniFiyat = Math.Round(yeniFiyat, 6);
 
-                                // BUGÜNÜN TARİHİNİ GARANTİLİ KONTROL ET (EF Core'da en güvenli yöntem)
                                 var bugun = DateTime.Today;
                                 var yarin = bugun.AddDays(1);
                                 var bugunkuKayit = dbContext.Set<FundPrice>()
@@ -108,12 +104,10 @@ namespace FonTakip.API.BackgroundTasks
 
                                 if (bugunkuKayit != null)
                                 {
-                                    // Sadece fiyatını güncelle (Tarihi ve saati aynı kalır)
                                     bugunkuKayit.Price = yeniFiyat;
                                 }
                                 else
                                 {
-                                    // Bugün için hiç kayıt yoksa yeni bir tane oluştur
                                     dbContext.Set<FundPrice>().Add(new FundPrice 
                                     { 
                                         FundId = fon.Id,
