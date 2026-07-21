@@ -9,8 +9,15 @@ export default function CompareFunds() {
   const [fund1Id, setFund1Id] = useState('1'); 
   const [fund2Id, setFund2Id] = useState('2');
 
-  const [startDate, setStartDate] = useState(new Date(2026, 5, 14));
-  const [endDate, setEndDate] = useState(new Date(2026, 6, 15));
+  // Arayüz ilk yüklendiğinde otomatik olarak bugünü hesapla
+  const bitisTarihi = new Date(); 
+
+  const baslangicTarihi = new Date();
+  baslangicTarihi.setMonth(bitisTarihi.getMonth() - 1); // 1 Ay öncesi
+
+  // Karşılaştırma ekranındaki State'lere bu dinamik tarihleri ver
+  const [startDate, setStartDate] = useState(baslangicTarihi);
+  const [endDate, setEndDate] = useState(bitisTarihi);
 
   const [chartData, setChartData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

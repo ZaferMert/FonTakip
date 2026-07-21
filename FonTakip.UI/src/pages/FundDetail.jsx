@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+
+// YENİ: Merkezi API dosyamızı içeri aktarıyoruz (axios yerine artık bunu kullanacağız)
+import api from '../api'; 
 
 export default function FundDetail() {
   const { id } = useParams();
@@ -12,10 +14,13 @@ export default function FundDetail() {
   const [fundData, setFundData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const [startDate, setStartDate] = useState(new Date(2026, 5, 14));
-  const [endDate, setEndDate] = useState(new Date(2026, 6, 15));
+  const bitisTarihi = new Date(); 
+  const baslangicTarihi = new Date();
+  baslangicTarihi.setMonth(bitisTarihi.getMonth() - 1); 
 
-  // --- YENİ EKLENEN PORTFÖY STATE'LERİ ---
+  const [startDate, setStartDate] = useState(baslangicTarihi);
+  const [endDate, setEndDate] = useState(bitisTarihi);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shares, setShares] = useState('');
   const [modalMessage, setModalMessage] = useState({ text: '', isError: false });
@@ -27,10 +32,9 @@ export default function FundDetail() {
         const token = localStorage.getItem('token');
         if (!token) return; 
 
-        const response = await axios.get('http://localhost:5043/api/favorites', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
+        // ESKİDEN: await axios.get('http://localhost:5043/api/favorites', { headers: ... })
+        // ŞİMDİ: Sadece adresi yazıyoruz, Token'ı api.js arka planda otomatik ekliyor!
+        const response = await api.get('/favorites');
         setIsFavorite(response.data.includes(Number(id)));
       } catch (err) {
         console.error("Favoriler getirilirken hata:", err);
@@ -47,9 +51,8 @@ export default function FundDetail() {
         return;
       }
 
-      const response = await axios.post(`http://localhost:5043/api/favorites/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // ŞİMDİ: Tertemiz, sadece isteği atıyoruz.
+      const response = await api.post(`/favorites/${id}`);
       setIsFavorite(response.data.isFavorite);
     } catch (err) {
       console.error("Favori işlemi başarısız:", err);
@@ -65,9 +68,19 @@ export default function FundDetail() {
         const formattedStart = startDate.toISOString().split('T')[0];
         const formattedEnd = endDate.toISOString().split('T')[0];
 
-        const response = await axios.get(`http://localhost:5043/api/funds/${id}/prices?startDate=${formattedStart}&endDate=${formattedEnd}`);
+        // ŞİMDİ: URL'ler çok daha okunabilir ve kısa!
+        const [fundInfoResponse, pricesResponse] = await Promise.all([
+          api.get(`/funds`),
+          api.get(`/funds/${id}/prices?startDate=${formattedStart}&endDate=${formattedEnd}`)
+        ]);
         
-        const chartData = response.data.map(fp => {
+        const fundInfo = fundInfoResponse.data.find(f => f.id === Number(id));
+
+        if (!fundInfo) {
+           throw new Error("Fon bilgisi API'de bulunamadı!");
+        }
+        
+        const chartData = pricesResponse.data.map(fp => {
           const dateObj = new Date(fp.date);
           return {
             date: dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
@@ -76,9 +89,9 @@ export default function FundDetail() {
         });
 
         setFundData({
-          name: id === "1" ? "Marmara Capital Hisse Senedi Fonu" : "Diğer Fon",
-          code: id === "1" ? "MAC" : "FON",
-          category: id === "1" ? "Hisse Senedi" : "Kıymetli Maden", 
+          name: fundInfo.name, 
+          code: fundInfo.code, 
+          category: fundInfo.category, 
           currentPrice: chartData.length > 0 ? chartData[chartData.length - 1].price : 0,
           dailyChange: "+%2.4",
           risk: "6 / 7",
@@ -90,7 +103,7 @@ export default function FundDetail() {
         setIsLoading(false);
       } catch (err) {
         console.error("Veri çekme hatası:", err);
-        setError("Seçilen tarih aralığında fon verisi bulunamadı.");
+        setError("Seçilen tarih aralığında fon verisi bulunamadı veya API'ye ulaşılamadı.");
         setIsLoading(false);
       }
     };
@@ -98,7 +111,6 @@ export default function FundDetail() {
     fetchFundDetails();
   }, [id, startDate, endDate]);
 
-  // --- YENİ EKLENEN PORTFÖYE EKLEME FONKSİYONU ---
   const handleAddToPortfolio = async (e) => {
     e.preventDefault();
     if (!shares || isNaN(shares) || Number(shares) <= 0) {
@@ -117,12 +129,11 @@ export default function FundDetail() {
         return;
       }
 
-      await axios.post('http://localhost:5043/api/portfolios', {
+      // ŞİMDİ: Body parametresini veriyoruz, yetkilendirmeyi api.js hallediyor.
+      await api.post('/portfolios', {
         fundId: Number(id),
         shares: Number(shares),
-        price: fundData.currentPrice // Güncel fiyatı maliyet olarak gönderiyoruz
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
+        price: fundData.currentPrice 
       });
 
       setModalMessage({ text: 'Fon başarıyla portföyünüze eklendi!', isError: false });
@@ -130,7 +141,7 @@ export default function FundDetail() {
         setIsModalOpen(false);
         setShares('');
         setModalMessage({ text: '', isError: false });
-      }, 2000); // 2 saniye sonra pencereyi otomatik kapat
+      }, 2000); 
       
     } catch (error) {
       console.error("Portföye eklenemedi:", error);
@@ -165,8 +176,6 @@ export default function FundDetail() {
           </div>
           
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
-
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
             <div>
               <div className="bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md text-sm font-bold text-cyan-400 w-fit mb-3">
                 {fundData?.code}
@@ -198,9 +207,8 @@ export default function FundDetail() {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center mb-4">
+        <div className="flex items-center mt-6 mb-4">
           <div className="flex items-center bg-zinc-900/60 border border-zinc-800/80 px-4 py-2 rounded-lg gap-2 shadow-sm">
             <svg className="w-4 h-4 text-zinc-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -271,7 +279,6 @@ export default function FundDetail() {
               </div>
             </div>
             
-            {/* BUTON GÜNCELLENDİ: Artık modal'ı açıyor */}
             <button 
               onClick={() => setIsModalOpen(true)}
               className="w-full mt-8 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors"
@@ -282,7 +289,6 @@ export default function FundDetail() {
         </div>
       </div>
 
-      {/* --- YENİ EKLENEN PORTFÖYE EKLEME MODALI (POP-UP) --- */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
@@ -338,8 +344,6 @@ export default function FundDetail() {
           </div>
         </div>
       )}
-      {/* MODAL BİTİŞ */}
-
     </div>
   );
 }

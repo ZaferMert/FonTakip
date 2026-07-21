@@ -9,19 +9,33 @@ namespace FonTakip.API.Data
 
         public DbSet<Fund> Funds { get; set; }
         public DbSet<User> Users { get; set; }
-        // Unuttuğumuz tabloyu geri ekliyoruz:
         public DbSet<FundPrice> FundPrices { get; set; } 
-        // Yeni tablomuz:
         public DbSet<UserFavorite> UserFavorites { get; set; }
-
         public DbSet<PortfolioItem> PortfolioItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // ÖN YÜZDEKİ VERİLERİ VERİTABANINA SABİTLİYORUZ
-            // Sadece sabit verileri (Id, Code, Name) veritabanına ekliyoruz.
+            // --- 1. DECIMAL HASSASİYET AYARLARI (Sarı uyarıları çözen kısım) ---
+            modelBuilder.Entity<FundPrice>()
+                .Property(f => f.Price)
+                .HasPrecision(18, 6);
+
+            modelBuilder.Entity<FundPrice>()
+                .Property(f => f.ChangeRate)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<PortfolioItem>()
+                .Property(p => p.AverageCost)
+                .HasPrecision(18, 6);
+
+            modelBuilder.Entity<PortfolioItem>()
+                .Property(p => p.Shares)
+                .HasPrecision(18, 3);
+            // -------------------------------------------------------------------
+
+            // --- 2. ÖN YÜZDEKİ VERİLERİ VERİTABANINA SABİTLİYORUZ (Senin Kodların) ---
             modelBuilder.Entity<Fund>().HasData(
                 new Fund { Id = 1, Code = "MAC", Name = "Marmara Capital Hisse Senedi Fonu" },
                 new Fund { Id = 2, Code = "AFT", Name = "Ak Portföy Teknoloji Şirketleri Fonu" },
