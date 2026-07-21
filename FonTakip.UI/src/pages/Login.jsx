@@ -10,6 +10,19 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // --- TEMEL VALİDASYON ---
+    if (!formData.email || !formData.password) {
+      setError('Lütfen e-posta ve şifrenizi giriniz.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Lütfen geçerli bir e-posta formatı kullanın.');
+      return;
+    }
+
     setError('');
     setIsLoading(true);
 
@@ -19,13 +32,9 @@ export default function Login() {
         password: formData.password
       });
       
-      // ÇÖZÜM BURADA: C# Backend'den gelen veriyi her ihtimale karşı (Büyük/Küçük harf veya direkt metin) yakalıyoruz.
       const actualToken = response.data.token || response.data.Token || response.data;
-      
-      // Yakaladığımız gerçek Token'ı tarayıcı hafızasına alıyoruz (Artık undefined olmayacak)
       localStorage.setItem('token', actualToken);
       
-      // Giriş başarılıysa piyasalar ekranına yönlendir
       navigate('/funds');
     } catch (err) {
       setError(err.response?.data?.message || 'E-posta veya şifre hatalı.');

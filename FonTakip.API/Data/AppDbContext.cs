@@ -14,6 +14,8 @@ namespace FonTakip.API.Data
         // Yeni tablomuz:
         public DbSet<UserFavorite> UserFavorites { get; set; }
 
+        public DbSet<PortfolioItem> PortfolioItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

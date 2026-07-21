@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom';
 
 export default function FundList() {
   const [searchTerm, setSearchTerm] = useState('');
-  // Yeni: Kullanıcının seçtiği görünüm modunu hafızada tutuyoruz (Varsayılan: grid)
   const [viewMode, setViewMode] = useState('grid'); 
 
-  // VERİTABANI İLE %100 EŞLEŞEN MOCK VERİLER (Id değerlerine dikkat)
+  // SENİN ORİJİNAL VERİLERİN (Sadece 'category' eklendi)
   const dummyFunds = [
-    { id: 1, code: 'MAC', name: 'Marmara Capital Hisse Senedi Fonu', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
-    { id: 2, code: 'AFT', name: 'Ak Portföy Teknoloji Şirketleri Fonu', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
-    { id: 3, code: 'YAF', name: 'Yapı Kredi Altın Fonu', price: '112.40 ₺', trend: '-0.5%', isPositive: false },
-    { id: 4, code: 'NNF', name: 'Hedef Portföy Birinci Hisse Senedi Fonu', price: '8.75 ₺', trend: '+3.1%', isPositive: true }
+    { id: 1, code: 'MAC', name: 'Marmara Capital Hisse Senedi Fonu', category: 'Hisse Senedi', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
+    { id: 2, code: 'AFT', name: 'Ak Portföy Teknoloji Şirketleri Fonu', category: 'Teknoloji', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
+    { id: 3, code: 'YAF', name: 'Yapı Kredi Altın Fonu', category: 'Kıymetli Maden', price: '112.40 ₺', trend: '-0.5%', isPositive: false },
+    { id: 4, code: 'NNF', name: 'Hedef Portföy Birinci Hisse Senedi Fonu', category: 'Hisse Senedi', price: '8.75 ₺', trend: '+3.1%', isPositive: true }
   ];
 
   const filteredFunds = dummyFunds.filter(fund => 
@@ -21,7 +20,6 @@ export default function FundList() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
-      {/* max-w genişletildi, içerik ekrana daha iyi yayılsın diye */}
       <div className="max-w-[1400px] mx-auto mb-8">
         
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
@@ -32,7 +30,6 @@ export default function FundList() {
 
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
             
-            {/* Arama Kutusu (Daha kompakt) */}
             <div className="relative w-full sm:w-80">
               <input
                 type="text"
@@ -46,7 +43,6 @@ export default function FundList() {
               </svg>
             </div>
 
-            {/* Görünüm Değiştirici Butonlar (Toggle) */}
             <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1 shrink-0">
               <button 
                 onClick={() => setViewMode('grid')}
@@ -80,8 +76,6 @@ export default function FundList() {
           </div>
         ) : viewMode === 'grid' ? (
           
-          /* --- BLOK (GRID) GÖRÜNÜMÜ --- */
-          /* Ekran boyutuna göre kolon sayısı: 1 -> 2 -> 3 -> 4 (xl) */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredFunds.map((fund) => (
               <Link 
@@ -98,9 +92,18 @@ export default function FundList() {
                   </span>
                 </div>
                 
-                <h2 className="text-sm font-medium text-zinc-300 mb-5 line-clamp-2 min-h-[2.5rem] group-hover:text-white transition-colors">
+                <h2 className="text-sm font-medium text-zinc-300 mb-1 line-clamp-2 min-h-[2.5rem] group-hover:text-white transition-colors">
                   {fund.name}
                 </h2>
+
+                {/* KATEGORİ BURAYA EKLENDİ (Grid Görünümü) */}
+                {fund.category && (
+                  <div className="mb-4">
+                    <span className="inline-block mt-1 text-[10px] font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
+                      {fund.category}
+                    </span>
+                  </div>
+                )}
                 
                 <div className="flex justify-between items-end border-t border-zinc-800/50 pt-3 mt-auto">
                   <span className="text-zinc-500 text-xs">Fiyat</span>
@@ -112,9 +115,7 @@ export default function FundList() {
 
         ) : (
 
-          /* --- DETAYLI LİSTE GÖRÜNÜMÜ --- */
           <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl overflow-hidden">
-            {/* Tablo Başlıkları (Mobilde Gizli) */}
             <div className="hidden sm:grid sm:grid-cols-12 gap-4 p-4 border-b border-zinc-800 bg-zinc-900/80 text-xs font-medium text-zinc-400 uppercase tracking-wider">
               <div className="col-span-2">Fon Kodu</div>
               <div className="col-span-6">Fon Adı</div>
@@ -122,7 +123,6 @@ export default function FundList() {
               <div className="col-span-2 text-right">Fiyat</div>
             </div>
             
-            {/* Tablo Satırları */}
             <div className="divide-y divide-zinc-800/50">
               {filteredFunds.map((fund) => (
                 <Link 
@@ -139,6 +139,12 @@ export default function FundList() {
                     <p className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors truncate">
                       {fund.name}
                     </p>
+                    {/* KATEGORİ BURAYA EKLENDİ (Liste Görünümü) */}
+                    {fund.category && (
+                      <span className="inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
+                        {fund.category}
+                      </span>
+                    )}
                   </div>
                   <div className="col-span-2 w-full sm:text-right flex justify-between sm:block mt-2 sm:mt-0">
                     <span className="sm:hidden text-xs text-zinc-500">Getiri: </span>

@@ -12,11 +12,15 @@ export default function FundDetail() {
   const [fundData, setFundData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // TAKVİM STATE'LERİ: Varsayılan olarak son 1 ayı seçili getirelim (14 Haziran - 14 Temmuz civarı)
-  const [startDate, setStartDate] = useState(new Date(2026, 5, 14)); // 14 Haziran 2026
-  const [endDate, setEndDate] = useState(new Date(2026, 6, 15)); // 15 Temmuz 2026
+  const [startDate, setStartDate] = useState(new Date(2026, 5, 14));
+  const [endDate, setEndDate] = useState(new Date(2026, 6, 15));
 
-  // 1. Favorileri Kontrol Etme (Mevcut kodumuz, dokunmadık)
+  // --- YENİ EKLENEN PORTFÖY STATE'LERİ ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [shares, setShares] = useState('');
+  const [modalMessage, setModalMessage] = useState({ text: '', isError: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
@@ -35,7 +39,6 @@ export default function FundDetail() {
     fetchFavorites();
   }, [id]);
 
-  // 2. Favori Ekle/Çıkar Fonksiyonu (Mevcut kodumuz, dokunmadık)
   const toggleFavorite = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -53,40 +56,35 @@ export default function FundDetail() {
     }
   };
 
-  // 3. İŞTE BÜYÜK BULUŞMA: API'den Canlı Veri Çekme
   useEffect(() => {
     const fetchFundDetails = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
-        // C# API'mizin beklediği formatta tarihleri ayarlıyoruz (YIL-AY-GÜN)
         const formattedStart = startDate.toISOString().split('T')[0];
         const formattedEnd = endDate.toISOString().split('T')[0];
 
-        // API'ye gidip sadece seçilen tarih aralığındaki fiyatları istiyoruz
         const response = await axios.get(`http://localhost:5043/api/funds/${id}/prices?startDate=${formattedStart}&endDate=${formattedEnd}`);
         
-        // API'den gelen veriyi React grafiğinin anladığı dile çeviriyoruz
         const chartData = response.data.map(fp => {
           const dateObj = new Date(fp.date);
           return {
-            // Tarihi "14 Haz", "21 Haz" gibi okunaklı formata çeviriyoruz
             date: dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
             price: fp.price
           };
         });
 
-        // Fonun diğer bilgileri (isim, risk vs) API'de henüz bir endpoint olmadığı için şimdilik sabit
         setFundData({
           name: id === "1" ? "Marmara Capital Hisse Senedi Fonu" : "Diğer Fon",
           code: id === "1" ? "MAC" : "FON",
+          category: id === "1" ? "Hisse Senedi" : "Kıymetli Maden", 
           currentPrice: chartData.length > 0 ? chartData[chartData.length - 1].price : 0,
           dailyChange: "+%2.4",
           risk: "6 / 7",
           monthlyReturn: "%8.5",
           yearlyReturn: "%112.4",
-          chart: chartData // Artık sabit liste değil, sadece API'den gelen taze veri var!
+          chart: chartData 
         });
 
         setIsLoading(false);
@@ -97,16 +95,57 @@ export default function FundDetail() {
       }
     };
 
-    // Bu useEffect, startDate veya endDate her değiştiğinde OTOMATİK olarak tekrar çalışır!
     fetchFundDetails();
   }, [id, startDate, endDate]);
+
+  // --- YENİ EKLENEN PORTFÖYE EKLEME FONKSİYONU ---
+  const handleAddToPortfolio = async (e) => {
+    e.preventDefault();
+    if (!shares || isNaN(shares) || Number(shares) <= 0) {
+      setModalMessage({ text: 'Lütfen geçerli bir adet giriniz.', isError: true });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setModalMessage({ text: '', isError: false });
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setModalMessage({ text: 'İşlem için giriş yapmalısınız.', isError: true });
+        setIsSubmitting(false);
+        return;
+      }
+
+      await axios.post('http://localhost:5043/api/portfolios', {
+        fundId: Number(id),
+        shares: Number(shares),
+        price: fundData.currentPrice // Güncel fiyatı maliyet olarak gönderiyoruz
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setModalMessage({ text: 'Fon başarıyla portföyünüze eklendi!', isError: false });
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setShares('');
+        setModalMessage({ text: '', isError: false });
+      }, 2000); // 2 saniye sonra pencereyi otomatik kapat
+      
+    } catch (error) {
+      console.error("Portföye eklenemedi:", error);
+      setModalMessage({ text: 'Fon eklenirken bir hata oluştu.', isError: true });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-cyan-400">Veriler Yükleniyor...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
+    <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8 relative">
       <div className="max-w-[1000px] mx-auto">
         
         <div className="mb-8">
@@ -117,6 +156,16 @@ export default function FundDetail() {
             Piyasalara Dön
           </Link>
           
+        <Link to="/portfolio" className="text-cyan-500 hover:text-cyan-400 text-sm flex items-center gap-2 transition-colors w-fit">
+              Cüzdanıma Git
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
             <div>
               <div className="bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md text-sm font-bold text-cyan-400 w-fit mb-3">
@@ -130,6 +179,16 @@ export default function FundDetail() {
                   </svg>
                 </button>
               </div>
+
+              {fundData?.category && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-sm text-zinc-500">Kategori:</span>
+                  <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-md bg-zinc-800 text-cyan-400 border border-zinc-700/50 shadow-sm">
+                    {fundData.category}
+                  </span>
+                </div>
+              )}
+              
             </div>
             <div className="text-left sm:text-right">
               <p className="text-zinc-500 text-sm mb-1">Güncel Fiyat</p>
@@ -141,7 +200,6 @@ export default function FundDetail() {
           </div>
         </div>
 
-        {/* ÖZEL TARİH FİLTRE ÇUBUĞU */}
         <div className="flex items-center mb-4">
           <div className="flex items-center bg-zinc-900/60 border border-zinc-800/80 px-4 py-2 rounded-lg gap-2 shadow-sm">
             <svg className="w-4 h-4 text-zinc-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,7 +233,6 @@ export default function FundDetail() {
           <div className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 md:p-6 h-[450px]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-zinc-400 text-sm font-medium">Performans Grafiği</h2>
-              {/* Tarih takvimimiz olduğu için o kafa karıştırıcı 1H 1A butonlarını kaldırdık, ekran tertemiz oldu! */}
             </div>
             
             {error ? (
@@ -213,12 +270,76 @@ export default function FundDetail() {
                 <span className="text-emerald-400 font-medium">{fundData?.yearlyReturn}</span>
               </div>
             </div>
-            <button className="w-full mt-8 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors">
+            
+            {/* BUTON GÜNCELLENDİ: Artık modal'ı açıyor */}
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="w-full mt-8 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors"
+            >
               Portföyüme Ekle
             </button>
           </div>
         </div>
       </div>
+
+      {/* --- YENİ EKLENEN PORTFÖYE EKLEME MODALI (POP-UP) --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-medium text-white">Portföye Ekle</h3>
+                <button onClick={() => setIsModalOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              {modalMessage.text && (
+                <div className={`p-3 rounded-lg text-sm mb-4 border ${modalMessage.isError ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                  {modalMessage.text}
+                </div>
+              )}
+
+              <form onSubmit={handleAddToPortfolio} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500 mb-1">Fon Adı</label>
+                  <input type="text" disabled value={fundData?.name} className="w-full bg-zinc-950 border border-zinc-800 text-zinc-400 rounded-lg px-3 py-2.5 text-sm cursor-not-allowed" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Birim Fiyat (Maliyet)</label>
+                    <input type="text" disabled value={`${fundData?.currentPrice} ₺`} className="w-full bg-zinc-950 border border-zinc-800 text-zinc-400 rounded-lg px-3 py-2.5 text-sm cursor-not-allowed" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Alınan Adet (Pay)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      value={shares} 
+                      onChange={(e) => setShares(e.target.value)} 
+                      placeholder="Örn: 100"
+                      className="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500" 
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-800 flex gap-3">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+                    İptal
+                  </button>
+                  <button type="submit" disabled={isSubmitting} className={`flex-1 text-white py-2.5 rounded-lg text-sm font-medium transition-colors ${isSubmitting ? 'bg-cyan-600/50 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500'}`}>
+                    {isSubmitting ? 'Ekleniyor...' : 'Kaydet'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL BİTİŞ */}
+
     </div>
   );
 }

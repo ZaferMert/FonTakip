@@ -95,5 +95,13 @@ namespace FonTakip.API.Services
 
             return prices;
         }
+
+        // POST: CSV'den gelen yüzlerce fiyatı tek seferde veritabanına kaydetme
+        public void AddPricesBulk(List<FundPrice> prices)
+        {
+            // AddRange, listeyi tek tek değil topluca SQL'e gönderir. Çok daha hızlıdır!
+            _context.FundPrices.AddRange(prices);
+            _context.SaveChanges();
+        }
     }
 }

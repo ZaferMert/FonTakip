@@ -4,6 +4,7 @@ using FonTakip.API.Models;
 using FonTakip.API.DTOs;
 using FonTakip.API.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 namespace FonTakip.API.Controllers
 {
@@ -43,7 +44,7 @@ namespace FonTakip.API.Controllers
 
         // 2. POST: Yeni fon ekleme kapısı
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public IActionResult CreateFund([FromBody] FundCreateDto request)
         {
             // Dışarıdan gelen garsonu (DTO), mutfağın anladığı dile (Entity) çeviriyoruz.
@@ -124,6 +125,63 @@ namespace FonTakip.API.Controllers
             }
 
             return Ok(prices);
+        }
+
+        // 7. POST: CSV dosyası ile toplu fiyat yükleme kapısı
+        // Adres Örneği: POST /api/funds/upload-csv
+        [HttpPost("upload-csv")]
+        public IActionResult UploadPricesCsv(IFormFile file)
+        {
+            // 1. Dosya hiç seçilmemişse veya boşsa hata dön
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Lütfen geçerli bir CSV dosyası yükleyin.");
+            }
+
+            var newPrices = new List<FundPrice>();
+
+            try
+            {
+                // 2. Dosyayı hafızaya alıp satır satır okumaya başlıyoruz
+                using (var stream = new StreamReader(file.OpenReadStream()))
+                {
+                    // İlk satır genellikle başlık (FundId,Date,Price) olur, onu atla
+                    var headerLine = stream.ReadLine();
+
+                    while (!stream.EndOfStream)
+                    {
+                        var line = stream.ReadLine();
+                        if (string.IsNullOrWhiteSpace(line)) continue; // Boş satırları atla
+
+                        // CSV formatında veriler virgül ile ayrılır
+                        var columns = line.Split(',');
+
+                        if (columns.Length >= 3)
+                        {
+                            // 3. Okunan satırdaki metinleri C# tiplerine (int, DateTime, decimal) çevir
+                            var fundPrice = new FundPrice
+                            {
+                                FundId = int.Parse(columns[0].Trim()),
+                                Date = DateTime.Parse(columns[1].Trim()),
+                                // InvariantCulture, 14.52 gibi noktalı sayıları sorunsuz okumak içindir
+                                Price = decimal.Parse(columns[2].Trim(), CultureInfo.InvariantCulture),
+                                ChangeRate = 0 // Bunu şimdilik 0 geçiyoruz
+                            };
+
+                            newPrices.Add(fundPrice);
+                        }
+                    }
+                }
+
+                // 4. Hazırlanan binlerce satırlık listeyi Servis'e verip kaydettir
+                _fundService.AddPricesBulk(newPrices);
+
+                return Ok($"{newPrices.Count} adet fiyat kaydı başarıyla veritabanına işlendi!");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"CSV okunurken bir hata oluştu: {ex.Message}");
+            }
         }
     }
 }

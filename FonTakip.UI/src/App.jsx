@@ -6,6 +6,9 @@ import FundList from './pages/FundList';
 import FundDetail from './pages/FundDetail';
 import FavoritesList from './pages/FavoritesList'; // YENİ: Sayfamızı içeri aktardık
 import CompareFunds from './pages/CompareFunds';
+import Admin from './pages/Admin';
+import Portfolio from './pages/Portfolio';
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
@@ -21,6 +24,12 @@ function App() {
         {/* YENİ: Favoriler rotasını tanımladık */}
         <Route path="/favorites" element={<FavoritesList />} /> 
         <Route path="/compare" element={<CompareFunds />} />
+        <Route path="/admin" element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
+        } />
+        <Route path="/portfolio" element={<Portfolio />} />
       </Routes>
     </div>
   );

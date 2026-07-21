@@ -43,7 +43,11 @@ export default function Navbar() {
             className={`text-sm font-medium transition-colors ${location.pathname === '/compare' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
             Karşılaştır
-</Link>
+          </Link>
+
+          <Link to="/portfolio" className="text-zinc-300 hover:text-white transition-colors text-sm font-medium">
+            Portföyüm
+            </Link>
           
           {/* Çıkış Butonu */}
           <button 
