@@ -42,9 +42,11 @@ docker-compose up -d --build
 ```
 
 Bu komut ile birlikte;
-- `fontakip_db`: SQL Server veritabanı,
-- `fontakip_api`: .NET 8 API katmanı (Backend),
+- `fontakip_db`: SQL Server veritabanı (1433 portu)
+- `fontakip_api`: .NET 8 API katmanı (Backend) (5043 portu)
 - `fontakip_ui`: React katmanı (Frontend) aynı anda ayağa kalkacaktır.
+
+*(Not: Eğer 5043, 5173 veya 1433 portları makinenizde başka bir uygulama tarafından kullanılıyorsa, `docker-compose.yml` dosyasından bu portları değiştirebilirsiniz.)*
 
 **Erişim Bağlantıları:**
 - Frontend (Kullanıcı Arayüzü): `http://localhost:5173`
@@ -54,7 +56,7 @@ Bu komut ile birlikte;
 ## 👨‍💻 Test Kullanıcıları
 Sistemin farklı yetkilerini test etmek için varsayılan olarak veritabanında yer alan kullanıcılar:
 - **Admin Yetkili:** `zafer@gmail.com` (Şifre: `Zafer2020.`)
-- **Standart Kullanıcı:** `tahabenli@gmail.com` veya `aliozturk@gmail.com` 
+- **Standart Kullanıcı:** `taha@example.com` (Şifre: `Taha3737.`) veya `ali@example.com` (Şifre: `Ali6666.`) 
 
 ## 📝 Not
 Bu proje, modern yazılım geliştirme pratiklerini yakalamak, uçtan uca (Full-Stack) bir projenin yaşam döngüsünü kavramak ve mimari becerileri pekiştirmek amacıyla geliştirilmiş bir portföy çalışmasıdır. Mimari kararlar ve kodlama süreçleri özenle kurgulanmıştır.
