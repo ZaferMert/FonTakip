@@ -10,7 +10,7 @@ export default function Admin() {
 
   const [funds, setFunds] = useState([]);
   
-  const [formData, setFormData] = useState({ id: null, name: '', code: '', risk: 1, category: 'Hisse Senedi' });
+  const [formData, setFormData] = useState({ id: null, name: '', code: '', risk: 1, category: 'Katılım Fonu' });
   const [formError, setFormError] = useState('');
   const [isEditing, setIsEditing] = useState(false); 
 
@@ -48,7 +48,7 @@ export default function Admin() {
         name: formData.name,
         code: formData.code.toUpperCase(),
         risk: Number(formData.risk),
-        category: formData.category,
+        category: 'Katılım Fonu',
         isActive: true
       };
 
@@ -62,7 +62,7 @@ export default function Admin() {
         await axios.post('http://localhost:5043/api/funds', payload, config);
       }
       
-      setFormData({ id: null, name: '', code: '', risk: 1, category: 'Hisse Senedi' });
+      setFormData({ id: null, name: '', code: '', risk: 1, category: 'Katılım Fonu' });
       setIsEditing(false);
       fetchFunds();
     } catch (error) {
@@ -77,14 +77,14 @@ export default function Admin() {
       name: fund.name,
       code: fund.code,
       risk: fund.risk,
-      category: fund.category || 'Hisse Senedi'
+      category: 'Katılım Fonu'
     });
     setIsEditing(true);
     setFormError('');
   };
 
   const handleCancelEdit = () => {
-    setFormData({ id: null, name: '', code: '', risk: 1, category: 'Hisse Senedi' });
+    setFormData({ id: null, name: '', code: '', risk: 1, category: 'Katılım Fonu' });
     setIsEditing(false);
     setFormError('');
   };
@@ -181,14 +181,7 @@ export default function Admin() {
                     <label className="block text-xs font-medium text-zinc-500 mb-1">Risk (1-7)</label>
                     <input type="number" min="1" max="7" value={formData.risk} onChange={(e) => setFormData({...formData, risk: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-500 mb-1">Kategori</label>
-                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500">
-                      <option value="Hisse Senedi">Hisse Senedi</option>
-                      <option value="Kıymetli Maden">Kıymetli Maden</option>
-                      <option value="Teknoloji">Teknoloji</option>
-                    </select>
-                  </div>
+                  {/* Kategori Sabit Olduğu İçin Formdan Kaldırıldı */}
                 </div>
                 
                 {/* BUTONLAR DİNAMİK OLARAK DEĞİŞİYOR */}
@@ -207,8 +200,8 @@ export default function Admin() {
             </div>
 
             <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-lg font-medium text-white mb-2">Fiyatları Güncelle</h2>
-              <p className="text-zinc-500 text-xs mb-4">Sütunlar: FundId, Date, Price olmalıdır.</p>
+              <h2 className="text-lg font-medium text-white mb-2">Fiyatları Güncelle (TEFAS CSV)</h2>
+              <p className="text-zinc-500 text-xs mb-4">TEFAS fon-verileri sayfasından indirilen veya yerel CSV dosyası (Fon Kodu, Tarih, Fiyat).</p>
               <input type="file" id="csv-upload" accept=".csv" onChange={handleFileChange} className="block w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-white mb-3" />
               <button onClick={handleUpload} disabled={isLoading} className={`w-full py-2 rounded-lg text-sm font-medium ${isLoading ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-800 hover:bg-zinc-700 text-white'}`}>
                 {isLoading ? 'İşleniyor...' : 'CSV Yükle'}
@@ -237,7 +230,11 @@ export default function Admin() {
                       <td className="px-4 py-3 font-medium text-zinc-500">#{fund.id}</td>
                       <td className="px-4 py-3 font-bold text-cyan-400">{fund.code}</td>
                       <td className="px-4 py-3 text-zinc-200">{fund.name}</td>
-                      <td className="px-4 py-3">{fund.category || '-'}</td>
+                      <td className="px-4 py-3">
+                        <span className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded text-xs">
+                          {fund.category || 'Katılım Fonu'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right flex justify-end gap-2">
                         {/* DÜZENLE BUTONU */}
                         <button 

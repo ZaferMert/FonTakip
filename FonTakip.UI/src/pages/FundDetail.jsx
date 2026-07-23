@@ -86,12 +86,14 @@ export default function FundDetail() {
         setFundData({
           name: fundInfo.name, 
           code: fundInfo.code, 
-          category: fundInfo.category, 
+          category: 'Katılım Fonu',
           currentPrice: chartData.length > 0 ? chartData[chartData.length - 1].price : 0,
-          dailyChange: "+%2.4",
-          risk: "6 / 7",
-          monthlyReturn: "%8.5",
-          yearlyReturn: "%112.4",
+          dailyChange: "+%1.8",
+          risk: `${fundInfo.risk || 3} / 7`,
+          managementFee: `%${fundInfo.managementFee || 1.5}`,
+          investorCount: fundInfo.investorCount ? fundInfo.investorCount.toLocaleString('tr-TR') : '12,450',
+          totalValue: fundInfo.totalValue ? `${(fundInfo.totalValue / 1000000).toFixed(1)}M ₺` : '450.0M ₺',
+          assetDistribution: fundInfo.assetDistribution || '%70 Kira Sertifikası, %30 Katılma Hesabı',
           chart: chartData 
         });
 
@@ -257,19 +259,29 @@ export default function FundDetail() {
           </div>
 
           <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-            <h3 className="text-white font-medium mb-6">Fon Özeti</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center pb-4 border-b border-zinc-800/50">
-                <span className="text-zinc-500 text-sm">Risk Değeri</span>
-                <span className="text-white font-medium">{fundData?.risk}</span>
+            <h3 className="text-white font-medium mb-6">TEFAS Fon Detayları</h3>
+            <div className="space-y-4 text-xs">
+              <div className="flex justify-between items-center pb-3 border-b border-zinc-800/50">
+                <span className="text-zinc-500">Risk Seviyesi</span>
+                <span className="text-cyan-400 font-bold">{fundData?.risk}</span>
               </div>
-              <div className="flex justify-between items-center pb-4 border-b border-zinc-800/50">
-                <span className="text-zinc-500 text-sm">Aylık Getiri</span>
-                <span className="text-emerald-400 font-medium">{fundData?.monthlyReturn}</span>
+              <div className="flex justify-between items-center pb-3 border-b border-zinc-800/50">
+                <span className="text-zinc-500">Yönetim Ücreti (Yıllık)</span>
+                <span className="text-white font-medium">{fundData?.managementFee}</span>
               </div>
-              <div className="flex justify-between items-center pb-4 border-b border-zinc-800/50">
-                <span className="text-zinc-500 text-sm">Yıllık Getiri</span>
-                <span className="text-emerald-400 font-medium">{fundData?.yearlyReturn}</span>
+              <div className="flex justify-between items-center pb-3 border-b border-zinc-800/50">
+                <span className="text-zinc-500">Yatırımcı Sayısı</span>
+                <span className="text-white font-medium">{fundData?.investorCount} kişi</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-zinc-800/50">
+                <span className="text-zinc-500">Portföy Büyüklüğü</span>
+                <span className="text-emerald-400 font-bold">{fundData?.totalValue}</span>
+              </div>
+              <div className="pt-1">
+                <span className="text-zinc-500 block mb-1">Varlık / İçerik Dağılımı:</span>
+                <span className="text-zinc-300 font-medium block bg-zinc-950 p-2 rounded-lg border border-zinc-800/60 leading-relaxed">
+                  {fundData?.assetDistribution}
+                </span>
               </div>
             </div>
             

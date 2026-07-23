@@ -5,25 +5,35 @@ import axios from 'axios';
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.email) {
+      newErrors.email = 'E-posta alanı zorunludur.';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = 'Geçerli bir e-posta adresi giriniz.';
+      }
+    }
+    if (!formData.password) {
+      newErrors.password = 'Şifre alanı zorunludur.';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // --- TEMEL VALİDASYON ---
-    if (!formData.email || !formData.password) {
-      setError('Lütfen e-posta ve şifrenizi giriniz.');
+    if (!validate()) {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Lütfen geçerli bir e-posta formatı kullanın.');
-      return;
-    }
-
-    setError('');
+    setGeneralError('');
     setIsLoading(true);
 
     try {
@@ -37,7 +47,7 @@ export default function Login() {
       
       navigate('/funds');
     } catch (err) {
-      setError(err.response?.data?.message || 'E-posta veya şifre hatalı.');
+      setGeneralError(err.response?.data?.message || 'E-posta veya şifre hatalı.');
     } finally {
       setIsLoading(false);
     }
@@ -52,18 +62,20 @@ export default function Login() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-zinc-900/50 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-zinc-800">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-md">{error}</div>}
+            {generalError && <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-md">{generalError}</div>}
             
             <div>
               <label className="block text-sm font-medium text-zinc-300">E-posta Adresi</label>
-              <input type="email" required className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-800/50 py-2 px-3 text-white shadow-sm focus:border-cyan-500"
-                value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+              <input type="email" className={`mt-1 block w-full rounded-md border bg-zinc-800/50 py-2 px-3 text-white shadow-sm focus:outline-none focus:ring-1 ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-zinc-700 focus:border-cyan-500 focus:ring-cyan-500'}`}
+                value={formData.email} onChange={(e) => { setFormData({...formData, email: e.target.value}); if (errors.email) setErrors({...errors, email: null}); }} />
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-zinc-300">Şifre</label>
-              <input type="password" required className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-800/50 py-2 px-3 text-white shadow-sm focus:border-cyan-500"
-                value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} />
+              <input type="password" className={`mt-1 block w-full rounded-md border bg-zinc-800/50 py-2 px-3 text-white shadow-sm focus:outline-none focus:ring-1 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-zinc-700 focus:border-cyan-500 focus:ring-cyan-500'}`}
+                value={formData.password} onChange={(e) => { setFormData({...formData, password: e.target.value}); if (errors.password) setErrors({...errors, password: null}); }} />
+              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
             </div>
 
             <button type="submit" disabled={isLoading} className="flex w-full justify-center rounded-md border border-transparent bg-cyan-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-cyan-500">

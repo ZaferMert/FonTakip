@@ -35,7 +35,7 @@ namespace FonTakip.API.Middlewares
             var errorResult = new ErrorResult
             {
                 StatusCode = context.Response.StatusCode,
-                Message = "Sistemde beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+                Message = exception.Message + " | " + exception.StackTrace
             };
 
             var json = JsonSerializer.Serialize(errorResult);

@@ -41,6 +41,11 @@ namespace FonTakip.API.Services
             return _context.Funds.Include(f => f.Prices).FirstOrDefault(f => f.Id == id);
         }
 
+        public Fund? GetFundByCode(string code)
+        {
+            return _context.Funds.FirstOrDefault(f => f.Code.ToLower() == code.Trim().ToLower());
+        }
+
         public void UpdateFund(Fund fund)
         {
             _context.Funds.Update(fund);

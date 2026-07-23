@@ -4,6 +4,23 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  let isAdmin = false;
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const decodedToken = JSON.parse(jsonPayload);
+      const userRole = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || decodedToken.role;
+      isAdmin = userRole === 'Admin';
+    } catch (e) {
+      // Geçersiz token durumu
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
@@ -42,7 +59,16 @@ export default function Navbar() {
 
           <Link to="/portfolio" className="text-zinc-300 hover:text-white transition-colors text-sm font-medium">
             Portföyüm
+          </Link>
+
+          {isAdmin && (
+            <Link 
+              to="/admin" 
+              className={`text-sm font-medium transition-colors ${location.pathname === '/admin' ? 'text-amber-400' : 'text-amber-500/70 hover:text-amber-400'}`}
+            >
+              Yönetici Paneli
             </Link>
+          )}
           
           <button 
             onClick={handleLogout}

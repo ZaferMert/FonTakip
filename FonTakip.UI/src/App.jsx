@@ -9,6 +9,7 @@ import CompareFunds from './pages/CompareFunds';
 import Admin from './pages/Admin';
 import Portfolio from './pages/Portfolio';
 import AdminRoute from './components/AdminRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -19,16 +20,18 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/funds" element={<FundList />} />
-        <Route path="/funds/:id" element={<FundDetail />} />
-        <Route path="/favorites" element={<FavoritesList />} /> 
-        <Route path="/compare" element={<CompareFunds />} />
+        <Route path="/funds" element={<ProtectedRoute><FundList /></ProtectedRoute>} />
+        <Route path="/funds/:id" element={<ProtectedRoute><FundDetail /></ProtectedRoute>} />
+        <Route path="/favorites" element={<ProtectedRoute><FavoritesList /></ProtectedRoute>} /> 
+        <Route path="/compare" element={<ProtectedRoute><CompareFunds /></ProtectedRoute>} />
         <Route path="/admin" element={
-          <AdminRoute>
-            <Admin />
-          </AdminRoute>
+          <ProtectedRoute>
+            <AdminRoute>
+              <Admin />
+            </AdminRoute>
+          </ProtectedRoute>
         } />
-        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
       </Routes>
     </div>
   );

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using FonTakip.API.Data;
 using FonTakip.API.Models;
 using FonTakip.API.DTOs;
 using FonTakip.API.Services;
-using Microsoft.AspNetCore.Authorization;
 using System.Globalization;
 
 namespace FonTakip.API.Controllers
@@ -23,31 +23,48 @@ namespace FonTakip.API.Controllers
         [HttpGet]
         public IActionResult GetFunds()
         {
-           var funds = _fundService.GetAllFunds();
-
-           return Ok(funds);
+            var funds = _fundService.GetAllFunds();
+            return Ok(funds);
         }
 
         // 2. GET: Kategoriye göre fonları filtreleme kapısı
-        // URL örneği: GET /api/funds/category/Hisse
         [HttpGet("category/{categoryName}")]
         public IActionResult GetByCategory(string categoryName)
         {
             var funds = _fundService.GetFundsByCategory(categoryName);
-
             return Ok(funds);
         }
 
-        // 2. POST: Yeni fon ekleme kapısı
+        // 3. POST: Yeni fon ekleme kapısı (Sadece Admin)
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Authorize]
         public IActionResult CreateFund([FromBody] FundCreateDto request)
         {
+            var existing = _fundService.GetFundByCode(request.Code);
+            if (existing != null)
+            {
+                existing.Name = request.Name;
+                existing.Category = string.IsNullOrWhiteSpace(request.Category) ? "Katılım Fonu" : request.Category;
+                existing.Risk = request.Risk > 0 ? request.Risk : existing.Risk;
+                existing.ManagementFee = request.ManagementFee > 0 ? request.ManagementFee : existing.ManagementFee;
+                existing.InvestorCount = request.InvestorCount > 0 ? request.InvestorCount : existing.InvestorCount;
+                existing.TotalValue = request.TotalValue > 0 ? request.TotalValue : existing.TotalValue;
+                if (!string.IsNullOrWhiteSpace(request.AssetDistribution)) existing.AssetDistribution = request.AssetDistribution;
+                
+                _fundService.UpdateFund(existing);
+                return Ok("Fon bilgileri güncellendi.");
+            }
+
             var newFund = new Fund
             {
                 Name = request.Name,
-                Code = request.Code,
-                Category = request.Category,
+                Code = request.Code.ToUpper(),
+                Category = string.IsNullOrWhiteSpace(request.Category) ? "Katılım Fonu" : request.Category,
+                Risk = request.Risk > 0 ? request.Risk : 3,
+                ManagementFee = request.ManagementFee > 0 ? request.ManagementFee : 1.5m,
+                InvestorCount = request.InvestorCount,
+                TotalValue = request.TotalValue,
+                AssetDistribution = request.AssetDistribution,
                 IsActive = true
             };
 
@@ -56,7 +73,8 @@ namespace FonTakip.API.Controllers
             return Ok("Fon başarıyla eklendi.");
         }
 
-        // 3. PUT: Mevcut bir fonu güncelleme kapısı
+        // 4. PUT: Mevcut bir fonu güncelleme kapısı (Sadece Admin)
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult UpdateFund(int id, [FromBody] FundUpdateDto request)
         {
@@ -70,6 +88,11 @@ namespace FonTakip.API.Controllers
             existingFund.Name = request.Name;
             existingFund.Code = request.Code;
             existingFund.Category = request.Category;
+            existingFund.Risk = request.Risk;
+            existingFund.ManagementFee = request.ManagementFee;
+            existingFund.InvestorCount = request.InvestorCount;
+            existingFund.TotalValue = request.TotalValue;
+            existingFund.AssetDistribution = request.AssetDistribution;
             existingFund.IsActive = request.IsActive;
 
             _fundService.UpdateFund(existingFund);
@@ -77,7 +100,8 @@ namespace FonTakip.API.Controllers
             return Ok("Fon başarıyla güncellendi.");
         }
 
-        // 4. DELETE: Bir fonu pasife çekme (Soft Delete) kapısı
+        // 5. DELETE: Bir fonu pasife çekme (Soft Delete) kapısı (Sadece Admin)
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteFund(int id)
         {
@@ -93,18 +117,16 @@ namespace FonTakip.API.Controllers
             return Ok("Fon başarıyla silindi.");
         }
 
-        // 5. POST: Bir fona yeni fiyat ekleme kapısı
-        // Adres Örneği: POST /api/funds/5/prices (5 numaralı fona fiyat ekle)
+        // 6. POST: Bir fona yeni fiyat ekleme kapısı (Sadece Admin)
+        [Authorize(Roles = "Admin")]
         [HttpPost("{fundId}/prices")]
         public IActionResult AddPrice(int fundId, [FromBody] FundPriceCreateDto request)
         {
             _fundService.AddPriceToFund(fundId, request.Price);
-
             return Ok("Fiyat başarıyla eklendi.");
         }
 
-        // 6. GET: Belirli tarih aralığına göre fon fiyatlarını getirme kapısı
-        // Adres Örneği: GET /api/funds/1/prices?startDate=2026-06-01&endDate=2026-07-01
+        // 7. GET: Belirli tarih aralığına göre fon fiyatlarını getirme kapısı
         [HttpGet("{fundId}/prices")]
         public IActionResult GetPricesByDateRange(int fundId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
@@ -118,8 +140,8 @@ namespace FonTakip.API.Controllers
             return Ok(prices);
         }
 
-        // 7. POST: CSV dosyası ile toplu fiyat yükleme kapısı
-        // Adres Örneği: POST /api/funds/upload-csv
+        // 8. POST: CSV Dosyası Yükleme Kapısı (Sadece Admin)
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload-csv")]
         public IActionResult UploadPricesCsv(IFormFile file)
         {
@@ -142,25 +164,91 @@ namespace FonTakip.API.Controllers
                         if (string.IsNullOrWhiteSpace(line)) continue;
 
                         var columns = line.Split(',');
+                        if (columns.Length < 3) continue;
 
-                        if (columns.Length >= 3)
+                        string code = columns[0].Trim();
+                        string name = columns.Length > 1 ? columns[1].Trim() : code;
+                        string category = columns.Length > 2 ? columns[2].Trim() : "Katılım Fonu";
+
+                        DateTime date = DateTime.Today;
+                        decimal price = 0m;
+                        decimal changeRate = 0m;
+
+                        int risk = 3;
+                        decimal fee = 1.5m;
+                        int investors = 0;
+                        decimal totalVal = 0m;
+                        string assets = "";
+
+                        if (columns.Length >= 11)
                         {
-                            var fundPrice = new FundPrice
-                            {
-                                FundId = int.Parse(columns[0].Trim()),
-                                Date = DateTime.Parse(columns[1].Trim()),
-                                Price = decimal.Parse(columns[2].Trim(), CultureInfo.InvariantCulture),
-                                ChangeRate = 0
-                            };
+                            DateTime.TryParse(columns[3].Trim(), out date);
+                            decimal.TryParse(columns[4].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out price);
+                            decimal.TryParse(columns[5].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out changeRate);
+                            int.TryParse(columns[6].Trim(), out risk);
+                            decimal.TryParse(columns[7].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out fee);
+                            int.TryParse(columns[8].Trim(), out investors);
+                            decimal.TryParse(columns[9].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out totalVal);
+                            assets = columns[10].Trim('"').Trim();
+                        }
+                        else if (columns.Length >= 5)
+                        {
+                            DateTime.TryParse(columns[3].Trim(), out date);
+                            decimal.TryParse(columns[4].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out price);
+                        }
+                        else
+                        {
+                            DateTime.TryParse(columns[1].Trim(), out date);
+                            decimal.TryParse(columns[2].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out price);
+                        }
 
-                            newPrices.Add(fundPrice);
+                        if (string.IsNullOrWhiteSpace(code)) continue;
+
+                        var fund = _fundService.GetFundByCode(code);
+                        if (fund == null)
+                        {
+                            fund = new Fund
+                            {
+                                Code = code.ToUpper(),
+                                Name = string.IsNullOrWhiteSpace(name) ? code : name,
+                                Category = string.IsNullOrWhiteSpace(category) ? "Katılım Fonu" : category,
+                                Risk = risk > 0 ? risk : 3,
+                                ManagementFee = fee > 0 ? fee : 1.5m,
+                                InvestorCount = investors,
+                                TotalValue = totalVal,
+                                AssetDistribution = assets,
+                                IsActive = true
+                            };
+                            _fundService.AddFund(fund);
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrWhiteSpace(name) && name != code) fund.Name = name;
+                            if (!string.IsNullOrWhiteSpace(category)) fund.Category = category;
+                            if (risk > 0) fund.Risk = risk;
+                            if (fee > 0) fund.ManagementFee = fee;
+                            if (investors > 0) fund.InvestorCount = investors;
+                            if (totalVal > 0) fund.TotalValue = totalVal;
+                            if (!string.IsNullOrWhiteSpace(assets)) fund.AssetDistribution = assets;
+                            _fundService.UpdateFund(fund);
+                        }
+
+                        if (fund.Id > 0 && price > 0)
+                        {
+                            newPrices.Add(new FundPrice
+                            {
+                                FundId = fund.Id,
+                                Date = date,
+                                Price = price,
+                                ChangeRate = changeRate
+                            });
                         }
                     }
                 }
 
                 _fundService.AddPricesBulk(newPrices);
 
-                return Ok($"{newPrices.Count} adet fiyat kaydı başarıyla veritabanına işlendi!");
+                return Ok($"{newPrices.Count} adet fon ve fiyat kaydı başarıyla veritabanına işlendi!");
             }
             catch (Exception ex)
             {

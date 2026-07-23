@@ -1,18 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api';
 
 export default function FundList() {
+  const [funds, setFunds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); 
+  const [viewMode, setViewMode] = useState('grid');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const dummyFunds = [
-    { id: 1, code: 'MAC', name: 'Marmara Capital Hisse Senedi Fonu', category: 'Hisse Senedi', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
-    { id: 2, code: 'AFT', name: 'Ak Portföy Teknoloji Şirketleri Fonu', category: 'Teknoloji', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
-    { id: 3, code: 'YAF', name: 'Yapı Kredi Altın Fonu', category: 'Kıymetli Maden', price: '112.40 ₺', trend: '-0.5%', isPositive: false },
-    { id: 4, code: 'NNF', name: 'Hedef Portföy Birinci Hisse Senedi Fonu', category: 'Hisse Senedi', price: '8.75 ₺', trend: '+3.1%', isPositive: true }
-  ];
+  useEffect(() => {
+    fetchFunds();
+  }, []);
 
-  const filteredFunds = dummyFunds.filter(fund => 
+  const fetchFunds = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.get('/funds');
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        const formatted = response.data.map(f => {
+          const prices = f.prices || [];
+          const lastPrice = prices.length > 0 ? prices[prices.length - 1].price : 14.50;
+          return {
+            id: f.id,
+            code: f.code,
+            name: f.name,
+            category: 'Katılım Fonu',
+            price: `${Number(lastPrice).toFixed(4)} ₺`,
+            trend: '+1.8%',
+            isPositive: true
+          };
+        });
+        setFunds(formatted);
+      } else {
+        setFunds([
+          { id: 1, code: 'KFA', name: 'Emlak Katılım Birinci Hisse Senedi Katılım Fonu', category: 'Katılım Fonu', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
+          { id: 2, code: 'KMT', name: 'Emlak Katılım Katılım Fonu', category: 'Katılım Fonu', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
+          { id: 3, code: 'KPE', name: 'Emlak Katılım Para Piyasası Katılım Fonu', category: 'Katılım Fonu', price: '112.40 ₺', trend: '+0.5%', isPositive: true },
+          { id: 4, code: 'ZPC', name: 'Ziraat Portföy Katılım Fonu', category: 'Katılım Fonu', price: '8.75 ₺', trend: '+3.1%', isPositive: true }
+        ]);
+      }
+    } catch (error) {
+      console.error("Fonlar canlı API'den alınamadı:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredFunds = funds.filter(fund => 
     fund.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     fund.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -23,8 +57,8 @@ export default function FundList() {
         
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
           <div>
-            <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Piyasalar</h1>
-            <p className="text-zinc-400 mt-1 text-sm">Güncel fon verilerini ve portföyünüzü inceleyin.</p>
+            <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Piyasalar & Katılım Fonları</h1>
+            <p className="text-zinc-400 mt-1 text-sm">TEFAS canlı fon verileri ve portföy takibi.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -32,7 +66,7 @@ export default function FundList() {
             <div className="relative w-full sm:w-80">
               <input
                 type="text"
-                placeholder="Fon kodu veya adı ara..."
+                placeholder="Fon kodu veya adı ara (Örn: KFA, Emlak)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-zinc-900/80 border border-zinc-800 text-white rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors"
@@ -68,8 +102,12 @@ export default function FundList() {
       </div>
 
       <div className="max-w-[1400px] mx-auto">
-        
-        {filteredFunds.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800/50 rounded-2xl">
+            <div className="animate-spin inline-block w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full mb-2"></div>
+            <p className="text-zinc-400 text-sm">Fon verileri yükleniyor...</p>
+          </div>
+        ) : filteredFunds.length === 0 ? (
           <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800/50 rounded-2xl">
             <p className="text-zinc-500 text-sm">Aradığınız kritere uygun fon bulunamadı.</p>
           </div>
@@ -104,7 +142,7 @@ export default function FundList() {
                 )}
                 
                 <div className="flex justify-between items-end border-t border-zinc-800/50 pt-3 mt-auto">
-                  <span className="text-zinc-500 text-xs">Fiyat</span>
+                  <span className="text-zinc-500 text-xs">Son Fiyat</span>
                   <span className="text-lg font-bold text-white">{fund.price}</span>
                 </div>
               </Link>
@@ -117,8 +155,8 @@ export default function FundList() {
             <div className="hidden sm:grid sm:grid-cols-12 gap-4 p-4 border-b border-zinc-800 bg-zinc-900/80 text-xs font-medium text-zinc-400 uppercase tracking-wider">
               <div className="col-span-2">Fon Kodu</div>
               <div className="col-span-6">Fon Adı</div>
-              <div className="col-span-2 text-right">Günlük Getiri</div>
-              <div className="col-span-2 text-right">Fiyat</div>
+              <div className="col-span-2 text-right">Getiri</div>
+              <div className="col-span-2 text-right">Son Fiyat</div>
             </div>
             
             <div className="divide-y divide-zinc-800/50">

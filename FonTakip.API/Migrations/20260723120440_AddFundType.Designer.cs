@@ -4,6 +4,7 @@ using FonTakip.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FonTakip.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723120440_AddFundType")]
+    partial class AddFundType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +66,10 @@ namespace FonTakip.API.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Funds");
@@ -79,7 +86,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 2.10m,
                             Name = "Emlak Katılım Birinci Hisse Senedi Katılım Fonu",
                             Risk = 6,
-                            TotalValue = 850400000.00m
+                            TotalValue = 850400000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -92,7 +100,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.50m,
                             Name = "Emlak Katılım Katılım Fonu",
                             Risk = 3,
-                            TotalValue = 420100000.00m
+                            TotalValue = 420100000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -105,7 +114,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 0.90m,
                             Name = "Emlak Katılım Para Piyasası Katılım Fonu",
                             Risk = 1,
-                            TotalValue = 1250000000.00m
+                            TotalValue = 1250000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -118,7 +128,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.75m,
                             Name = "Ziraat Portföy Katılım Fonu",
                             Risk = 4,
-                            TotalValue = 310500000.00m
+                            TotalValue = 310500000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -131,7 +142,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.80m,
                             Name = "Ziraat Portföy Altın Katılım Fonu",
                             Risk = 5,
-                            TotalValue = 980300000.00m
+                            TotalValue = 980300000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -144,7 +156,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.60m,
                             Name = "Türkiye Finans Katılım Fonu",
                             Risk = 3,
-                            TotalValue = 510000000.00m
+                            TotalValue = 510000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -157,7 +170,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.95m,
                             Name = "Albaraka Portföy Katılım Fonu",
                             Risk = 5,
-                            TotalValue = 290800000.00m
+                            TotalValue = 290800000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -170,7 +184,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.70m,
                             Name = "Kuveyt Türk Portföy Katılım Fonu",
                             Risk = 4,
-                            TotalValue = 480200000.00m
+                            TotalValue = 480200000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -183,7 +198,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.85m,
                             Name = "Ata Portföy Katılım Fonu",
                             Risk = 4,
-                            TotalValue = 195000000.00m
+                            TotalValue = 195000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -196,7 +212,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.45m,
                             Name = "Vakıf Katılım Birinci Katılım Fonu",
                             Risk = 3,
-                            TotalValue = 620000000.00m
+                            TotalValue = 620000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -209,7 +226,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 2.20m,
                             Name = "Marmara Capital Portföy Hisse Senedi Fonu",
                             Risk = 6,
-                            TotalValue = 1850000000.00m
+                            TotalValue = 1850000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -222,7 +240,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 2.90m,
                             Name = "Ak Portföy Amerika Yabancı Hisse Senedi Fonu",
                             Risk = 7,
-                            TotalValue = 3450000000.00m
+                            TotalValue = 3450000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -235,7 +254,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 1.75m,
                             Name = "Yapı Kredi Portföy Altın Fonu",
                             Risk = 5,
-                            TotalValue = 2100000000.00m
+                            TotalValue = 2100000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -248,7 +268,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 2.50m,
                             Name = "Hedef Portföy Birinci Hisse Senedi Fonu",
                             Risk = 6,
-                            TotalValue = 1420000000.00m
+                            TotalValue = 1420000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         },
                         new
                         {
@@ -261,7 +282,8 @@ namespace FonTakip.API.Migrations
                             ManagementFee = 2.30m,
                             Name = "İş Portföy BIST 100 Dışı Şirketler Fonu",
                             Risk = 6,
-                            TotalValue = 990000000.00m
+                            TotalValue = 990000000.00m,
+                            Type = "Menkul Kıymet Yatırım Fonları"
                         });
                 });
 
