@@ -63,7 +63,7 @@ export default function Portfolio() {
         
         <div className="mb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Cüzdanım</h1>
+            <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Portföyüm</h1>
             <p className="text-zinc-400 mt-1 text-sm">Yatırımlarınızın güncel durumunu takip edin.</p>
           </div>
           <Link to="/funds" className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
@@ -83,7 +83,7 @@ export default function Portfolio() {
               </svg>
             </div>
             <h2 className="text-lg font-medium text-white mb-2">Portföyünüz Boş</h2>
-            <p className="text-zinc-500 text-sm mb-6 max-w-md mx-auto">Henüz cüzdanınıza hiçbir fon eklememişsiniz. Piyasalara giderek beğendiğiniz fonları portföyünüze dahil edebilirsiniz.</p>
+            <p className="text-zinc-500 text-sm mb-6 max-w-md mx-auto">Henüz portföyünüze hiçbir fon eklememişsiniz. Piyasalara giderek beğendiğiniz fonları portföyünüze dahil edebilirsiniz.</p>
             <Link to="/funds" className="inline-block bg-cyan-600 hover:bg-cyan-500 text-white font-medium px-6 py-2.5 rounded-lg transition-colors">
               Piyasaları Keşfet
             </Link>

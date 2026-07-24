@@ -164,7 +164,7 @@ export default function FundDetail() {
           </Link>
           
         <Link to="/portfolio" className="text-cyan-500 hover:text-cyan-400 text-sm flex items-center gap-2 transition-colors w-fit">
-              Cüzdanıma Git
+              Portföyüme Git
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
