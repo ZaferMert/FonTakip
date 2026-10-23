@@ -4,14 +4,14 @@ services:
     container_name: fontakip_db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=FonTakip.2026
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
       - fontakip_db_data:/var/opt/mssql
 
   api:
-    build: 
+    build:
       context: ./FonTakip.API
       dockerfile: Dockerfile
     container_name: fontakip_api
@@ -21,7 +21,8 @@ services:
       - "5043:5043"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=FonTakipDb;User Id=sa;Password=FonTakip.2026;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=FonTakipDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
 
 volumes:
   fontakip_db_data:
