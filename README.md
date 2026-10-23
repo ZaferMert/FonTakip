@@ -30,33 +30,75 @@ FonTakip, TEFAS (Türkiye Elektronik Fon Alım Satım Platformu) mantığıyla �
 - Docker & Docker Compose (Tek tıkla kurulum)
 - Swagger UI (Geliştirme ortamında API dokümantasyonu)
 
-## 🐳 Hızlı Kurulum ve Çalıştırma
 
-Projenin tüm katmanları Docker ile konteynerize edilmiştir. Makinenizde Docker ve Docker Compose yüklü ise projeyi saniyeler içinde ayağa kaldırabilirsiniz.
+## 🐳 Installation and Setup
 
-1. Depoyu bilgisayarınıza indirin (Clone).
-2. Terminal üzerinden projenin ana dizinine gidin.
-3. Aşağıdaki komutu çalıştırın:
+### Prerequisites
+
+- Docker Desktop
+- Docker Compose
+- Node.js and npm
+
+### 1. Clone the Repository
+
 ```bash
-docker-compose up -d --build
+git clone https://github.com/ZaferMert/FonTakip.git
+cd FonTakip
 ```
 
-Bu komut ile birlikte;
-- `fontakip_db`: SQL Server veritabanı (1433 portu)
-- `fontakip_api`: .NET 8 API katmanı (Backend) (5043 portu)
-- `fontakip_ui`: React katmanı (Frontend) aynı anda ayağa kalkacaktır.
+### 2. Configure Environment Variables
 
-*(Not: Eğer 5043, 5173 veya 1433 portları makinenizde başka bir uygulama tarafından kullanılıyorsa, `docker-compose.yml` dosyasından bu portları değiştirebilirsiniz.)*
+Create a `.env` file in the project root using `.env.example` as a reference.
 
-**Erişim Bağlantıları:**
-- Frontend (Kullanıcı Arayüzü): `http://localhost:5173`
-- Backend (API) Base URL: `http://localhost:5043/api`
-- Swagger API Dokümantasyonu: `http://localhost:5043/swagger`
+Set the following variables:
 
-## 👨‍💻 Test Kullanıcıları
-Sistemin farklı yetkilerini test etmek için varsayılan olarak veritabanında yer alan kullanıcılar:
-- **Admin Yetkili:** `zafer@gmail.com` (Şifre: `Zafer2020.`)
-- **Standart Kullanıcı:** `taha@example.com` (Şifre: `Taha3737.`) veya `ali@example.com` (Şifre: `Ali6666.`) 
+- `MSSQL_SA_PASSWORD`: A strong SQL Server administrator password.
+- `JWT_SECRET_KEY`: A cryptographically secure random JWT signing key.
+
+Generate a JWT key with:
+
+```bash
+openssl rand -hex 32
+```
+
+Never commit the `.env` file or real credentials to GitHub.
+
+### 3. Start the Backend and Database
+
+```bash
+docker compose up -d --build db api
+```
+
+Docker Compose starts:
+
+- SQL Server on port `1433`
+- ASP.NET Core Web API on port `5043`
+
+The API automatically applies Entity Framework Core migrations.
+
+### 4. Start the Frontend
+
+```bash
+cd FonTakip.UI
+npm ci
+npm run dev
+```
+
+The React application runs locally using Vite.
+
+### 5. Access the Application
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5043/api
+- Swagger UI: http://localhost:5043/swagger
+
+### 6. Create a User Account
+
+Open the application and use the registration page to create an account.
+
+New accounts receive the `User` role by default. Administrative privileges must be assigned separately by an authorized database administrator.
+
+No default administrator credentials are distributed with this repository. 
 
 ## 📝 Not
 Bu proje, modern yazılım geliştirme pratiklerini yakalamak, uçtan uca (Full-Stack) bir projenin yaşam döngüsünü kavramak ve mimari becerileri pekiştirmek amacıyla geliştirilmiş bir portföy çalışmasıdır. Mimari kararlar ve kodlama süreçleri özenle kurgulanmıştır.
