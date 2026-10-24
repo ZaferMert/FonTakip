@@ -103,7 +103,7 @@ export default function CompareFunds() {
     <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
       <div className="max-w-[1300px] mx-auto">
         <h1 className="text-2xl font-medium tracking-tight text-zinc-100 mb-2">Fon Karşılaştırma</h1>
-        <p className="text-zinc-400 text-sm mb-8">Canlı TEFAS verileri üzerinden fonları yan yana karşılaştırın.</p>
+        <p className="text-zinc-400 text-sm mb-8">Fonların geçmiş performanslarını karşılaştırın ve analiz edin.</p>
 
         <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6 items-center justify-between">
           

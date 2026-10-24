@@ -200,8 +200,8 @@ export default function Admin() {
             </div>
 
             <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-lg font-medium text-white mb-2">Fiyatları Güncelle (TEFAS CSV)</h2>
-              <p className="text-zinc-500 text-xs mb-4">TEFAS fon-verileri sayfasından indirilen veya yerel CSV dosyası (Fon Kodu, Tarih, Fiyat).</p>
+              <h2 className="text-lg font-medium text-white mb-2">CSV ile Fiyat Güncelle</h2>
+              <p className="text-zinc-500 text-xs mb-4">Fon Kodu, Tarih ve Fiyat sütunlarını içeren CSV dosyasını yükleyin.</p>
               <input type="file" id="csv-upload" accept=".csv" onChange={handleFileChange} className="block w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-white mb-3" />
               <button onClick={handleUpload} disabled={isLoading} className={`w-full py-2 rounded-lg text-sm font-medium ${isLoading ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-800 hover:bg-zinc-700 text-white'}`}>
                 {isLoading ? 'İşleniyor...' : 'CSV Yükle'}

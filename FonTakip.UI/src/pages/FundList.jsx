@@ -58,7 +58,7 @@ export default function FundList() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
           <div>
             <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Piyasalar & Katılım Fonları</h1>
-            <p className="text-zinc-400 mt-1 text-sm">TEFAS canlı fon verileri ve portföy takibi.</p>
+            <p className="text-zinc-400 mt-1 text-sm">Katılım fonlarını keşfedin, karşılaştırın ve portföyünüzü takip edin.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">

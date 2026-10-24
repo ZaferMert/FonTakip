@@ -259,7 +259,7 @@ export default function FundDetail() {
           </div>
 
           <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-            <h3 className="text-white font-medium mb-6">TEFAS Fon Detayları</h3>
+            <h3 className="text-white font-medium mb-6">Fon Detayları</h3>
             <div className="space-y-4 text-xs">
               <div className="flex justify-between items-center pb-3 border-b border-zinc-800/50">
                 <span className="text-zinc-500">Risk Seviyesi</span>

@@ -1,40 +1,91 @@
-# FonTakip - Katılım Fonu Takip ve Yönetim Sistemi
+# FonTakip
 
-FonTakip, TEFAS (Türkiye Elektronik Fon Alım Satım Platformu) mantığıyla çalışan, kullanıcılara "Katılım Fonlarını" listeleme, karşılaştırma ve portföylerinde takip etme imkanı sunan tam kapsamlı (Full-Stack) bir web uygulamasıdır. Proje, kurumsal bankacılık "Hazine Uygulamaları" süreçlerinden ilham alınarak, güncel yazılım mühendisliği pratikleriyle geliştirilmiştir.
+### Participation Fund Tracking and Portfolio Management
 
-## 🚀 Öne Çıkan Özellikler
+FonTakip is a full-stack web application designed to explore, compare, and track participation investment funds.
 
-- **Katılım Fonu Odağı:** Sistem tamamen Katılım Fonlarına özel olarak tasarlanmıştır. Gereksiz kategori karmaşası olmadan net bir finansal vizyon sunar.
-- **Güvenlik ve Yetkilendirme (JWT):** Kullanıcı giriş ve kayıt işlemlerinde veri doğrulama (validation) süreçleri mevcuttur. Rota (Route) bazlı yetki kontrolü yapılarak Admin ve Kullanıcı rolleri birbirinden ayrılmıştır.
-- **Yönetici Paneli (Admin Paneli):** Yetkili kullanıcılar sistemde listelenen fonları yönetebilir (CRUD işlemleri) ve CSV formatında toplu fiyat güncellemesi yapabilirler.
-- **Otomatik Fiyat Simülasyonu:** Arka planda her gün otomatik olarak çalışan (.NET BackgroundService) simülatör, mevcut fonların fiyatlarını günlük olarak rastgele dalgalandırarak uygulamanın "canlı" kalmasını sağlar.
-- **Gelişmiş Görselleştirme:** Fonların geçmiş performans verileri Recharts kullanılarak interaktif grafiklerle kullanıcılara sunulur. Karşılaştırma sayfası ile farklı fonların performansları yan yana incelenebilir.
+Inspired by Türkiye's TEFAS platform and financial treasury applications, FonTakip demonstrates modern software engineering practices through a React frontend, an ASP.NET Core Web API, and a SQL Server database.
 
-## 🛠 Kullanılan Teknolojiler
+The project focuses on fund management, portfolio tracking, data visualization, and role-based access control.
 
-**Backend (Arka Yüz)**
-- .NET 8.0 / ASP.NET Core Web API
-- Entity Framework Core (Code-First)
-- SQL Server (Docker Container)
-- JWT tabanlı Kimlik Doğrulama (Authentication)
-- C# BackgroundService (Zamanlanmış Görevler)
+> **Note:** Fund prices are simulated for educational and demonstration purposes. The application does not provide live financial market data.
 
-**Frontend (Ön Yüz)**
-- React 18 (Vite)
-- Tailwind CSS (Modern ve duyarlı tasarım)
-- React Router DOM (Yönlendirme ve korumalı rotalar)
-- Axios (API İstekleri - Interceptor ile otomatik token yönetimi)
-- Recharts (Veri görselleştirme ve grafikler)
+## Features
 
-**Altyapı ve Dağıtım (DevOps)**
-- Docker & Docker Compose (Tek tıkla kurulum)
-- Swagger UI (Geliştirme ortamında API dokümantasyonu)
+- **Fund Explorer:** Browse participation investment funds and view their key information.
+- **Fund Comparison:** Compare historical fund performance using interactive charts.
+- **Portfolio Tracking:** Organize and monitor funds within a personal portfolio.
+- **Authentication & Authorization:** Secure user registration and login using JWT-based authentication and role-based access control.
+- **Admin Dashboard:** Manage investment funds through CRUD operations.
+- **CSV Import:** Update fund price data by uploading CSV files.
+- **Automated Price Simulation:** Generate simulated daily fund price movements using a .NET BackgroundService.
+- **Responsive Interface:** Access the application through a modern React interface styled with Tailwind CSS.
 
+## Tech Stack
 
-## 🐳 Installation and Setup
+| Layer | Technologies |
+|-------|--------------|
+| Frontend | React 18, Vite, Tailwind CSS |
+| Routing | React Router |
+| HTTP Client | Axios |
+| Data Visualization | Recharts |
+| Backend | C#, ASP.NET Core Web API (.NET 8) |
+| Database | Microsoft SQL Server |
+| ORM | Entity Framework Core |
+| Authentication | JSON Web Tokens (JWT) |
+| Background Processing | .NET BackgroundService |
+| Containerization | Docker, Docker Compose |
+| API Documentation | Swagger UI |
+
+## Architecture
+
+FonTakip follows a layered full-stack architecture consisting of four main components:
+
+**Frontend — React**
+
+Provides the user interface for exploring funds, comparing performance, managing portfolios, and accessing administrative features.
+
+**Backend — ASP.NET Core Web API**
+
+Handles HTTP requests, business logic, authentication, authorization, and fund management operations.
+
+**Database — SQL Server**
+
+Stores application data, user accounts, investment funds, and historical fund price records. Entity Framework Core is used for database access and migrations.
+
+**Background Processing — .NET BackgroundService**
+
+Generates simulated daily fund price updates for demonstration purposes.
+
+The backend and database run in Docker containers, while the React frontend runs locally using Vite.
+
+## Screenshots
+
+### Fund Explorer
+
+Browse participation funds and explore their key information.
+
+![FonTakip Fund Explorer](docs/screenshots/fund-list.png)
+
+### Fund Comparison
+
+Compare historical fund performance using interactive charts and view fund-specific information.
+
+![FonTakip Fund Comparison](docs/screenshots/fund-comparison.png)
+
+### Admin Dashboard
+
+Manage investment funds and import fund price data through CSV files.
+
+![FonTakip Admin Dashboard](docs/screenshots/admin-panel.png)
+
+## Getting Started
 
 ### Prerequisites
 
+Make sure the following tools are installed:
+
+- Git
 - Docker Desktop
 - Docker Compose
 - Node.js and npm
@@ -48,57 +99,134 @@ cd FonTakip
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the project root using `.env.example` as a reference.
+Create a local environment file from the provided example:
 
-Set the following variables:
+```bash
+cp .env.example .env
+```
 
-- `MSSQL_SA_PASSWORD`: A strong SQL Server administrator password.
-- `JWT_SECRET_KEY`: A cryptographically secure random JWT signing key.
+Open `.env` and configure the following variables:
 
-Generate a JWT key with:
+| Variable | Description |
+|----------|-------------|
+| `MSSQL_SA_PASSWORD` | Password for the SQL Server administrator account |
+| `JWT_SECRET_KEY` | Secret key used for signing JWT authentication tokens |
+
+Use a strong, unique password for SQL Server.
+
+Generate a cryptographically secure JWT signing key:
 
 ```bash
 openssl rand -hex 32
 ```
 
-Never commit the `.env` file or real credentials to GitHub.
+Copy the generated value into the `JWT_SECRET_KEY` variable in your local `.env` file.
+
+**Security:** Never commit `.env`, passwords, or other sensitive credentials to version control.
 
 ### 3. Start the Backend and Database
+
+From the project root, run:
 
 ```bash
 docker compose up -d --build db api
 ```
 
-Docker Compose starts:
+Docker Compose starts the following services:
 
-- SQL Server on port `1433`
-- ASP.NET Core Web API on port `5043`
+| Service | Address |
+|---------|---------|
+| SQL Server | `localhost:1433` |
+| ASP.NET Core API | `http://localhost:5043` |
+| Swagger UI | `http://localhost:5043/swagger` |
 
-The API automatically applies Entity Framework Core migrations.
+The application applies Entity Framework Core database migrations during startup.
+
+The first startup may take longer while Docker downloads the required images and initializes SQL Server.
 
 ### 4. Start the Frontend
 
+Open a new terminal and navigate to the frontend directory:
+
 ```bash
 cd FonTakip.UI
+```
+
+Install the required dependencies:
+
+```bash
 npm ci
+```
+
+Start the Vite development server:
+
+```bash
 npm run dev
 ```
 
-The React application runs locally using Vite.
+Open the application in your browser:
 
-### 5. Access the Application
+**http://localhost:5173**
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5043/api
-- Swagger UI: http://localhost:5043/swagger
+### 5. Create a User Account
 
-### 6. Create a User Account
+Open the application and register a new account using the registration page.
 
-Open the application and use the registration page to create an account.
+Newly registered accounts receive the `User` role by default.
 
-New accounts receive the `User` role by default. Administrative privileges must be assigned separately by an authorized database administrator.
+Administrative privileges must be assigned separately by an authorized database administrator.
 
-No default administrator credentials are distributed with this repository. 
+No default administrator credentials are included in this repository.
 
-## 📝 Not
-Bu proje, modern yazılım geliştirme pratiklerini yakalamak, uçtan uca (Full-Stack) bir projenin yaşam döngüsünü kavramak ve mimari becerileri pekiştirmek amacıyla geliştirilmiş bir portföy çalışmasıdır. Mimari kararlar ve kodlama süreçleri özenle kurgulanmıştır.
+### 6. Stop the Application
+
+Stop the frontend development server by pressing `Ctrl+C` in its terminal.
+
+From the project root, stop the backend and database containers:
+
+```bash
+docker compose stop
+```
+
+This stops the services without deleting the database volume.
+
+To restart the existing containers:
+
+```bash
+docker compose start
+```
+
+**Important:** Docker Compose commands must use the same project name to access the same containers and database volume. If you start the application with a custom project name using `-p`, use that name for subsequent commands.
+
+## Configuration & Security
+
+FonTakip uses environment variables to manage sensitive application configuration.
+
+The repository includes `.env.example` as a configuration template. Actual credentials must be stored locally in `.env`, which is excluded from Git tracking.
+
+Authentication is implemented using JWT, with separate authorization rules for standard users and administrators.
+
+The application is intended for local development, learning, and portfolio demonstration. Additional security hardening would be required before a public production deployment.
+
+## Project Status
+
+FonTakip is an educational and portfolio project developed to explore:
+
+- Full-stack web application development
+- RESTful API design
+- JWT authentication and role-based authorization
+- Relational database design
+- Entity Framework Core
+- Background services
+- Interactive data visualization
+- Docker-based development environments
+
+The application uses simulated data and is not intended for real financial trading or investment decisions.
+
+## Author
+
+**Zafer Mert Serinken**
+
+Computer Engineering Student
+
+[GitHub Profile](https://github.com/ZaferMert)
