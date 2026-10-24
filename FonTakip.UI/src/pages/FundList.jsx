@@ -18,43 +18,53 @@ export default function FundList() {
       const response = await api.get('/funds');
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         const formatted = response.data.map(f => {
-          const prices = f.prices || [];
-          const lastPrice = prices.length > 0 ? prices[prices.length - 1].price : 14.50;
+          const prices = [...(f.prices || [])].sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          );
+
+          const latestPrice = prices[0];
+
+          const price = latestPrice
+            ? `${Number(latestPrice.price).toFixed(4)} ₺`
+            : '—';
+
+          const changeRate = latestPrice?.changeRate != null
+            ? Number(latestPrice.changeRate)
+            : null;
+
+          const trend = changeRate !== null && Number.isFinite(changeRate)
+            ? `${changeRate > 0 ? '+' : ''}${changeRate.toFixed(2)}%`
+            : '—';
+
           return {
             id: f.id,
             code: f.code,
             name: f.name,
-            category: 'Katılım Fonu',
-            price: `${Number(lastPrice).toFixed(4)} ₺`,
-            trend: '+1.8%',
-            isPositive: true
+            category: f.category || 'Katılım Fonu',
+            price,
+            trend,
+            isPositive: changeRate !== null && changeRate >= 0
           };
         });
         setFunds(formatted);
       } else {
-        setFunds([
-          { id: 1, code: 'KFA', name: 'Emlak Katılım Birinci Hisse Senedi Katılım Fonu', category: 'Katılım Fonu', price: '14.52 ₺', trend: '+2.4%', isPositive: true },
-          { id: 2, code: 'KMT', name: 'Emlak Katılım Katılım Fonu', category: 'Katılım Fonu', price: '28.30 ₺', trend: '+1.8%', isPositive: true },
-          { id: 3, code: 'KPE', name: 'Emlak Katılım Para Piyasası Katılım Fonu', category: 'Katılım Fonu', price: '112.40 ₺', trend: '+0.5%', isPositive: true },
-          { id: 4, code: 'ZPC', name: 'Ziraat Portföy Katılım Fonu', category: 'Katılım Fonu', price: '8.75 ₺', trend: '+3.1%', isPositive: true }
-        ]);
+        setFunds([]);
       }
     } catch (error) {
-      console.error("Fonlar canlı API'den alınamadı:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Fon verileri API'den alınamadı:", error);
+      setFunds([]);
     }
   };
 
-  const filteredFunds = funds.filter(fund => 
-    fund.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredFunds = funds.filter(fund =>
+    fund.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     fund.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
       <div className="max-w-[1400px] mx-auto mb-8">
-        
+
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
           <div>
             <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Piyasalar & Katılım Fonları</h1>
@@ -62,7 +72,7 @@ export default function FundList() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            
+
             <div className="relative w-full sm:w-80">
               <input
                 type="text"
@@ -77,7 +87,7 @@ export default function FundList() {
             </div>
 
             <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1 shrink-0">
-              <button 
+              <button
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-zinc-800 text-cyan-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                 title="Blok Görünümü"
@@ -86,7 +96,7 @@ export default function FundList() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
               </button>
-              <button 
+              <button
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-zinc-800 text-cyan-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                 title="Liste Görünümü"
@@ -96,7 +106,7 @@ export default function FundList() {
                 </svg>
               </button>
             </div>
-            
+
           </div>
         </div>
       </div>
@@ -112,11 +122,11 @@ export default function FundList() {
             <p className="text-zinc-500 text-sm">Aradığınız kritere uygun fon bulunamadı.</p>
           </div>
         ) : viewMode === 'grid' ? (
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredFunds.map((fund) => (
-              <Link 
-                to={`/funds/${fund.id}`} 
+              <Link
+                to={`/funds/${fund.id}`}
                 key={fund.id}
                 className="block bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 hover:border-cyan-500/50 hover:bg-zinc-900 transition-all duration-200 group"
               >
@@ -128,7 +138,7 @@ export default function FundList() {
                     {fund.trend}
                   </span>
                 </div>
-                
+
                 <h2 className="text-sm font-medium text-zinc-300 mb-1 line-clamp-2 min-h-[2.5rem] group-hover:text-white transition-colors">
                   {fund.name}
                 </h2>
@@ -140,7 +150,7 @@ export default function FundList() {
                     </span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-between items-end border-t border-zinc-800/50 pt-3 mt-auto">
                   <span className="text-zinc-500 text-xs">Son Fiyat</span>
                   <span className="text-lg font-bold text-white">{fund.price}</span>
@@ -158,11 +168,11 @@ export default function FundList() {
               <div className="col-span-2 text-right">Getiri</div>
               <div className="col-span-2 text-right">Son Fiyat</div>
             </div>
-            
+
             <div className="divide-y divide-zinc-800/50">
               {filteredFunds.map((fund) => (
-                <Link 
-                  to={`/funds/${fund.id}`} 
+                <Link
+                  to={`/funds/${fund.id}`}
                   key={fund.id}
                   className="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-4 p-4 hover:bg-zinc-800/40 transition-colors items-start sm:items-center group"
                 >
